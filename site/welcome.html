@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CandyHop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script>
+function loginSubmit() {
+	var self = this;
+
+	function enable(state) {
+		$(self).find('.form-control').prop('disabled', !state);
+		$(self).find('button[type="submit"]').prop('disabled', !state);
+		$(self).find('.fa-spin').toggleClass('hidden',state);
+	}
+
+	try {
+		enable(false);
+		var data = {}
+		var form = $(self).find('.form-control');
+		$.each(form,function(index,value) {
+			data[value.name] = $(value).val();
+		});
+
+		function failure(message) {
+			$('#login-failure').modal('show');
+			$('#failMessage').text(message);
+			enable(true);
+		}
+
+		function success(response) {
+			var r = typeof response == 'string' ? JSON.parse(response) : response;
+			if( r.result == 'success' ) {
+				window.location = 'index.html';
+				//$(self).find('.fa-spin').toggleClass('hidden',false);
+				//$('#login-success').modal('show');
+			}
+			failure(r.message);
+		}
+
+		$.ajax({
+			url: '/login',
+			method: 'POST',
+			contentType:"application/json; charset=utf-8",
+			data: JSON.stringify(data),
+			success: success,
+			error: function(jqXHR, textStatus) {
+				failure(textStatus);
+			}
+		});
+
+	}
+	catch(e) {
+		debugger;
+	}
+	return false;
+}
+
+</script>
+</head>
+<body>
+<div id="login-dialog" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content modal-smaller">
+			<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Login To CandyHop</h4>
+			</div>
+			<div class="modal-body">
+				<p>Please enter your CandyHop login information.</p>
+				<form
+					class="form-horizontal"
+					onsubmit="return loginSubmit.apply(this,[]);"
+				>
+					<fieldset>
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+							<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+							<input name="userName" placeholder="Your user name" class="form-control" type="text" required>
+							</div>
+						</div>
+					</div>
+
+					<!-- Text input-->
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+						<input name="password" placeholder="Your Password" class="form-control" type="password" required>
+							</div>
+						</div>
+					</div>
+
+					<!-- Button -->
+					<div class="form-group">
+						<label class="col-xs-4 control-label"></label>
+						<div class="col-xs-4">
+							<button type="submit" class="btn btn-info">
+							<span><i class="fa fa-refresh fa-spin hidden"></i></span>
+									Login Now</span>
+							</button>
+						</div>
+					</div>
+
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="login-success" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Thanks for contacting us!</h4>
+			</div>
+			<div class="modal-body">
+				<p>We will get back to you shortly.</p>
+			</div>
+			<div class="modal-footer">
+				<a type="button" class="btn btn-primary" href="/">Continue</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="login-failure" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Login Failed</h4>
+			</div>
+			<div class="modal-body">
+				<p>Sorry, but your login did not succeed.</p>
+				<p id='failMessage'></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Try Again</button>
+				<a type="button" class="btn btn-primary" href="/">Skip It</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container">
+	<div class="jumbotron text-center">
+		<h1>Candy Hop</h1>
+		<i class="fa-li fa fa-check-square-o"></i>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<p class="lead">Welcome to CandyHop!</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<p>
+			Login now to start playing!
+			</p>
+			<a class="btn btn-info btn-md appsoma-blue-bg spacer" data-toggle="modal" data-target="#login-dialog">Login</a>
+		</div>
+	</div>
+	<hr>
+</div>
+</body>

@@ -1,0 +1,26 @@
+if [ "$1" == "deploy" ]
+then
+echo Deploying from github.com/wdemarest/candyhop to playcandyhop.com
+ssh ubuntu@playcandyhop.com "cd ~/candyhop ; git fetch --all ; git reset --hard origin/master"
+fi
+
+if [ "$1" == "stop" ] || [ "$1" == "restart" ]
+then
+echo Stopping candyhop on playcandyhop.com
+ssh ubuntu@playcandyhop.com "pkill nodejs"
+ssh ubuntu@playcandyhop.com "ps ax | grep n[o]dejs.*server.js"
+fi
+
+if [ "$1" == "start" ] || [ "$1" == "restart" ]
+then
+echo Starting candyhop on playcandyhop.com
+ssh ubuntu@playcandyhop.com "cd ~/candyhop ; nohup nodejs /usr/local/bin/supervisor -x nodejs -n error ./server.js >> ~/candyhop/candyhop.log 2>&1 &"
+ssh ubuntu@playcandyhop.com "ps ax | grep n[o]dejs.*server.js"
+fi
+
+if [ "$1" == "watch" ]
+then
+ssh ubuntu@playcandyhop.com "tail -f -n 100 ~/candyhop/candyhop.log"
+fi
+
+
