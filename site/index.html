@@ -40,18 +40,23 @@
 	.centered {
 		margin:auto;
 	}
-	.panel {
+	#game .gamePanel {
 		vertical-align: top;
 		display: inline-block;
 	}
 	#game canvas {
 		display: block;
 	}
+	#tutorial {
+		position: absolute;
+		z-index: 2;
+		font-size: 30px;
+	}
 	#game .levelNumber{
 	    font-size: 40px;
 	}
 	#game .score, #levelComplete .score {
-		font-size: 76px;
+		font-size: 60px;
 	}
 	#levelComplete {
 		z-index:100;
@@ -64,7 +69,7 @@
 		background-color:white;
 	}
 	.heading {
-		font-size: 80px;
+		font-size: 60px;
 	}
 	#levelComplete .collected {
 		margin: auto;
@@ -112,17 +117,21 @@
 	var level;
 	var board;
 	var tile = {
-	    empty: { index: 0, name: "empty"},
-	    start: { index: 1, name: "start"},
-	    end: { index: 2, name: "end", points: 100},
-	    redMint: { index: 3, name: "red mint", points: 10},
-	    greenMint: { index: 4, name: "green mint", points: 20},
-	    special: { index: 5, name: "special", points: 50},
-	    bridge: { index: 6, name: "bridge", points: 30}
+	    empty: { index: 0, name: "empty", letter: ' '},
+	    start: { index: 1, name: "start", letter: 'S'},
+	    end: { index: 2, name: "end", letter: 'E', points: 20},
+	    redMint: { index: 3, name: "red mint", letter: '.', points: 10},
+	    greenMint: { index: 4, name: "green mint", letter: 'g', points: 20},
+	    special: { index: 5, name: "special", letter: '+', points: 50},
+	    bridge: { index: 6, name: "bridge", letter: 'b', points: 30}
 	}
 	var tileByIndex = [];
 	for( var i in tile ) {
 	    tileByIndex[tile[i].index] = tile[i];
+	}
+	var tileByLetter = [];
+	for( var i in tile ) {
+	    tileByLetter[tile[i].letter] = tile[i];
 	}
 
 	function readCookie(name) {
@@ -134,6 +143,17 @@
 			if (c.indexOf(nameEQ) == 0) return unescape( c.substring(nameEQ.length, c.length) );
 		}
 		return null;
+	}
+	
+	function toLayout(s) {
+	    var layout = [];
+	    for( var y=0 ; y<10 ; ++y ) {
+	        layout[y] = [];
+	        for( var x=0 ; x<10 ; ++x ) {
+	            layout[y][x] = tileByLetter[s[y*1][x]].index;
+	        }
+	    }
+	    return layout;
 	}
 
 
@@ -214,13 +234,43 @@
 		this.scoreAdd = function(amount){
 			score += amount;
 		}
-
+		
+		function tutorial(x, y){
+			if(levelNumber == 0){
+				$("#tutorial").show();
+				var pos = $("#game canvas").position()
+				$("#tutorial").css({top: (pos.top)+200, left: pos.left});
+				if(x == 0 && y == 0){
+					$("#tutorial").html("Use the arrow keys to move.<br />"+
+					"<img src='image/arrowKeys.png'><br />"+
+					"Hit the down arrow.")
+				}
+				if((x == 0 && y == 1) || (x == 1 && y == 1)){
+					$("#tutorial").html("Hit the right arrow.")
+				}
+				
+				if(x == 2 && y == 1){
+					$("#tutorial").html("Hit the up arrow.")
+				}
+				if(x == 2 && y == 0){
+					$("#tutorial").html("Get to the end flag with as many points as you can!")
+				}
+				if(x == 4 && y == 0){
+					$("#tutorial").html("Cotton candies give you more points!")
+				}
+			}
+			else {
+				$("#tutorial").hide();
+			}
+		}
+		
 		var tick = function(){
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			board.draw();
 			player.draw();
 			$("#game .score").html(score+"/"+scoreMax);
 			$("#game .levelNumber").html("Level "+(levelNumber+1))
+			tutorial(player.x, player.y);
 		}
 
 		this.select = function(){
@@ -289,21 +339,31 @@
 		}
 
 		this.restart = function(){
-			shutDown();
+		    // This counts that you've made a try...
+			progressSave(levelNumber, 0, 0, function (result){
+			});
 			this.start(levelNumber);
 		}
 
 		this.start = function(newLevelNumber){
 			screen = "game";
+			shutDown();
 			levelNumber = newLevelNumber;
 			if (levelNumber<0 || levelNumber>=layoutList.length){
-				alert("this level "+levelNumber+" does not exist")
+				alert("this level "+levelNumber+" does not exist");
+				return;
 			}
 			board = new Board(layoutList[levelNumber]);
 			board.init();
 			score = 0;
 			scoreMax = board.findMax();
 			player = new Player(board.startX, board.startY);
+			$("#gameNextLevel").hide();
+			progressGet(function(progress){
+				if(progress[levelNumber] && progress[levelNumber].stars > 0 && levelNumber+1 < layoutList.length){
+					$("#gameNextLevel").show();
+				}
+			})
 			$("#game").show();
 			$(document).on("keydown",gameControls);
 			Ticker.start("tick",0.05,tick);
@@ -355,7 +415,7 @@
 		}
 		this.upMax = function(amount){
 		    scoreMax += amount;
-		    
+		 	
 		}
 	}
 
@@ -539,13 +599,18 @@
 		$('.userName').html( readCookie( 'userName' ) );
 		level = new Level();
 
+        if( readCookie('isAdmin') == "1" ) {
+            $('#signup').show();
+            $('#stats').show();
+        }
+
 		//soundBank.play("ambient").loop(true);
-		var startFromTitleScreen = true;
+		var startFromTitleScreen = false;
 		if(readCookie('isAdmin') == 1){
 		    //startFromTitleScreen = false;
 		}
 		
-		var startLevel = 15; // layoutList.length - 1;
+		var startLevel = layoutList.length - 1;
 		var levelFound = window.location.hash.match( /#(\d+)/ );
 		if( levelFound && levelFound[1] !== undefined ) {
             var possibleStartLevel = parseInt(levelFound[1]) - 1;
@@ -588,6 +653,16 @@
 					<img src="image/iconLevelSelect.png">
 				</button>
 			</div>
+			<div id='signup' class='startHidden'>
+				<button onClick="javascript: window.location = '/signup.html';">
+					Admin: Signup Users
+				</button>
+			</div>
+			<div id='stats' class='startHidden'>
+				<button onClick="javascript: window.location = '/stats';">
+					Admin: User Stats
+				</button>
+			</div>
 			<div>
 				<button onClick="javascript: logout();">
 					Logout
@@ -601,10 +676,14 @@
 	<div id="levelSelect" class="startHidden layer">
 		<div class="whiteBox">
 			<div class="heading">
-				Choose a level to play
+				Choose a Level
 			</div>
 			<div class="levelList">
-
+			</div>
+			<div class="toTitle">
+				<button onClick="javascript: $('#levelSelect').hide(); $('#titleScreen').show();">
+					Title Screen
+				</button>
 			</div>
 		</div>
 	</div>
@@ -661,11 +740,11 @@
 
 	<div id="game" class="startHidden layer">
 		<div class="centered">
-			<div class="panel">
+			<div class="gamePanel">
 				<canvas width = "760" height = "760" id = "board">
 				</canvas>
 			</div>
-			<div class="panel">
+			<div class="gamePanel">
 				<div class="score">
 				</div>
 				<div class="levelNumber">
@@ -680,6 +759,14 @@
 						<img src="image/iconLevelSelect.png">
 					</button>
 				</div>
+				<div id="gameNextLevel">
+					<button class="candyButton" onClick="javascript: level.nextLevel();">
+						<img src="image/nextLevel.png">
+					</button>
+				</div>
+			</div>
+			<div id="tutorial">
+				
 			</div>
 		</div>
 	</div>

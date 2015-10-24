@@ -25,32 +25,32 @@ Sample config
 }
 */
 var mkdirp = require('mkdirp');
-mkdirp('./sessions', function(err) {
-    if( !err ) {
-        console.log("Created /sessions directory.");
-    }
-	console.log(err);
-});
+if( !fs.existsSync('./sessions') ) {
+	console.log("Creatingng /sessions directory.");
+	mkdirp('./sessions', function(err) {
+		if( err ) console.log(err);
+	});
+}
 
 if( !fs.existsSync(config.credentialsFile) ) {
-    console.log("Creating", config.credentialsFile);
-    console.log("Filling with user 'admin'");
+	console.log("Creating", config.credentialsFile);
+	console.log("Filling with user 'admin'");
 	fs.writeFileSync(config.credentialsFile,JSON.stringify({
-        "admin": ""     // the username 'admin' always is tested against 'config.adminPassword'
+		"admin": "" // the username 'admin' always is tested against 'config.adminPassword'
 	},null,4));
 }
 
 if( !fs.existsSync(config.userDataFile) ) {
-    console.log("Creating", config.userDataFile);
-    console.log("Adding user data for 'admin'");
+	console.log("Creating", config.userDataFile);
+	console.log("Adding user data for 'admin'");
 	fs.writeFileSync(config.userDataFile,JSON.stringify({
-        "admin": {
-            userName: "admin",
-            userEmail: "",  
-            progress: [],
-            isAdmin: 1,
-            isUnlocked: 1
-        }
+		"admin": {
+			userName: "admin",
+			userEmail: "",  
+			progress: [],
+			isAdmin: 1,
+			isUnlocked: 1
+		}
 	},null,4));
 }
 
@@ -99,6 +99,9 @@ function emailSubmit(req, res) {
 
 function userDataRead(userName) {
 	var userData = JSON.parse( fs.readFileSync(config.userDataFile,'utf8') || "{}" );
+	if( userName === true ) {
+		return userData;
+	}
 	return userData[userName];
 }
 
@@ -112,7 +115,7 @@ function userDataWrite(userName,fn) {
 var progress = {};
 
 progress.get = function(req,res) {
-    //console.log('progress.get');
+	//console.log('progress.get');
 	var userName = req.session.userName;
 	//console.log(userName);
 	var userData = userDataRead(userName);
@@ -136,20 +139,52 @@ progress.post = function(req,res) {
 		userData.progress = userData.progress || [];
 		// Save this level's best progress
 		userData.progress[level] = {
-            points: Math.max(progress.points || 0, points),
-            stars: Math.max(progress.stars || 0, stars),
-            tries: (progress.tries || 0) + 1
+			points: Math.max(progress.points || 0, points),
+			stars: Math.max(progress.stars || 0, stars),
+			tries: (progress.tries || 0) + 1
 		};
 		// Open up the next level for play
 		if( stars > 0 && (userData.progress[level+1] === undefined || userData.progress[level+1] === null) ) {
-            userData.progress[level+1] = {
-                points: 0,
-                stars: 0,
-                tries: 0
-            };
+			userData.progress[level+1] = {
+				points: 0,
+				stars: 0,
+				tries: 0
+			};
 		}
 	});
 	return res.send( { result: 'success' } );
+}
+
+var stats = {};
+stats.get = function(req,res) {
+    function fix(s,len) { return (s+'                    ').substr(0,len); }
+	var userData = userDataRead(true);
+	var head = [fix('USERNAME',16)];
+	var sum = [];
+	var count = [];
+	var s = '';
+	for( var userName in userData ) {
+		var line = [fix(userName,16)];
+		var progress = userData[userName].progress;
+		for( var i=0 ; i<progress.length ; ++i ) {
+            var tries = progress[i] ? progress[i].tries || 0 : '';
+            if( tries ) {
+                count[i] = (count[i] || 0) + 1;
+                sum[i] = (sum[i] || 0) + tries;
+            }
+			line.push(tries);
+			head[i] = head[i] || i;
+		}
+		s += line.join('\t')+'\n';
+	}
+	var avg = [fix('AVG',16)];
+    for( var a=0 ; a<sum.length ; ++a ) {
+        avg[a+1] = (sum[a] || 0) / (count[a] || 0.0001);
+	}
+	s += avg.join('\t')+'\n';
+	s = '<pre>'+head.join('\t')+'\n'+s+'</pre>';
+//	res.header("Content-Type", "text/plain");
+	return res.end( s );
 }
 
 function login(req,res) {
@@ -159,7 +194,7 @@ function login(req,res) {
 
 	var credentials = JSON.parse( fs.readFileSync(config.credentialsFile,'utf8') || "{}" );
 	if( credentials ) {
-	    credentials['admin'] = config.adminPassword;
+		credentials['admin'] = config.adminPassword;
 	}
 	console.log(credentials);
 
@@ -187,11 +222,11 @@ function login(req,res) {
 }
 
 function signup(req,res) {
-    // only allow signup when an admin is logged in
-    if( !req.session.isAdmin ) {
+	// only allow signup when an admin is logged in
+	if( !req.session.isAdmin ) {
 		return res.send( { result: 'failure', message: 'Signup not allowed except when logged in as admin.' } );
-    }
-    
+	}
+	
 	var userName = req.body.userName;
 	var userEmail = req.body.userEmail;
 	var password = req.body.password;
@@ -301,6 +336,7 @@ function serverStart() {
 	app.post( "/signup", signup );
 	app.get( "/progress", progress.get );
 	app.post( "/progress", progress.post );
+	app.get( "/stats", stats.get );
 
 	app.get( "/after_payment", function(req,res,next) {
 		res.send( "Payment Complete" );
