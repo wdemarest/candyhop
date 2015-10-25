@@ -37,8 +37,14 @@
 	.startHidden {
 		display: none;
 	}
+	.centerContents {
+		margin-left: auto;
+		margin-right: auto;
+	}
 	.centered {
-		margin:auto;
+		float: none;
+		margin-left: auto;
+		margin-right: auto;
 	}
 	#game .gamePanel {
 		vertical-align: top;
@@ -95,6 +101,19 @@
 	.levelListNum {
 	    font-size: 40px;
 	}
+	.editor {
+		border-top: 4px solid black;
+		border-bottom: 4px solid black;
+		margin-top: 6px;
+		margin-bottom: 6px;
+		width: 100%;
+	}
+	.editor img {
+		border: 2px solid black;
+		width: 50px;
+		height: 50px;
+		margin-bottom: 4px;
+	}
     
 </style>
 <script src="https://code.jquery.com/jquery-2.1.4.js">
@@ -116,6 +135,8 @@
 	var screen = "game";
 	var level;
 	var board;
+	var editor;
+
 	var tile = {
 	    empty: { index: 0, name: "empty", letter: ' '},
 	    start: { index: 1, name: "start", letter: 'S'},
@@ -190,9 +211,8 @@
             }
         }
 
-		this.init = function (){
+		this.findStart = function (){
 			for(var mintY = 0; mintY < 10; mintY ++){
-
 				for(var mintX = 0; mintX < 10; mintX ++){
 					if(layout[mintY][mintX] == 1){
 						this.startX = mintX;
@@ -211,9 +231,7 @@
 			return max;
 		}
 		this.draw = function(){
-
 			for(var mintY = 0; mintY < 10; mintY ++){
-
 				for(var mintX = 0; mintX < 10; mintX ++){
 				    var tile = getTile(mintX, mintY);
 				    if( tile === undefined ) {
@@ -226,6 +244,7 @@
         
 		return this;
 	};
+	
 	var Level = function(){
 		var levelNumber;
 		var score = 0;
@@ -235,32 +254,38 @@
 			score += amount;
 		}
 		
+		this.getLayout = function() {
+			return layoutList[levelNumber];
+		}
+		
 		function tutorial(x, y){
-			if(levelNumber == 0){
+			if(levelNumber != 0){
+				return;
+			}
+		
+			if( $("#tutorial:hidden") ) {
 				$("#tutorial").show();
 				var pos = $("#game canvas").position()
 				$("#tutorial").css({top: (pos.top)+200, left: pos.left});
-				if(x == 0 && y == 0){
-					$("#tutorial").html("Use the arrow keys to move.<br />"+
-					"<img src='image/arrowKeys.png'><br />"+
-					"Hit the down arrow.")
-				}
-				if((x == 0 && y == 1) || (x == 1 && y == 1)){
-					$("#tutorial").html("Hit the right arrow.")
-				}
-				
-				if(x == 2 && y == 1){
-					$("#tutorial").html("Hit the up arrow.")
-				}
-				if(x == 2 && y == 0){
-					$("#tutorial").html("Get to the end flag with as many points as you can!")
-				}
-				if(x == 4 && y == 0){
-					$("#tutorial").html("Cotton candies give you more points!")
-				}
 			}
-			else {
-				$("#tutorial").hide();
+			
+			if(x == 0 && y == 0){
+				$("#tutorial").html("Use the arrow keys to move.<br />"+
+				"<img src='image/arrowKeys.png'><br />"+
+				"Hit the down arrow.")
+			}
+			if((x == 0 && y == 1) || (x == 1 && y == 1)){
+				$("#tutorial").html("Hit the right arrow.")
+			}
+			
+			if(x == 2 && y == 1){
+				$("#tutorial").html("Hit the up arrow.")
+			}
+			if(x == 2 && y == 0){
+				$("#tutorial").html("Get to the end flag with as many points as you can!")
+			}
+			if(x == 4 && y == 0){
+				$("#tutorial").html("Cotton candies give you more points!")
 			}
 		}
 		
@@ -348,13 +373,14 @@
 		this.start = function(newLevelNumber){
 			screen = "game";
 			shutDown();
+
 			levelNumber = newLevelNumber;
 			if (levelNumber<0 || levelNumber>=layoutList.length){
 				alert("this level "+levelNumber+" does not exist");
 				return;
 			}
 			board = new Board(layoutList[levelNumber]);
-			board.init();
+			board.findStart();
 			score = 0;
 			scoreMax = board.findMax();
 			player = new Player(board.startX, board.startY);
@@ -366,11 +392,17 @@
 			})
 			$("#game").show();
 			$(document).on("keydown",gameControls);
+			$(canvas).on("click", function(e) {
+				onClickCanvas(e);
+			});
+			editor = new Editor();
+
 			Ticker.start("tick",0.05,tick);
 		}
 
 		var shutDown = function(){
 			$(document).unbind("keydown");
+			$(canvas).unbind("click");
 			Ticker.stop("tick");
 		}
 
@@ -418,65 +450,115 @@
 		 	
 		}
 	}
+	
+	var Editor = function() {
+		var active = false;
+		var curTile = null;
+		var layout = null;
+		function start() {
+			$('.editor').show();
+			Ticker.start("editorDraw",0.1,draw);
+			layout = level.getLayout();
+			board = new Board(layout);
+			active = true;
+		}
+		function stop() {
+			$('.editor').hide();
+			Ticker.stop("editorDraw");
+			active = false;
+			level.restart();
+		}
+		function draw() {
+			if( screen != 'game' ) { return; }
+			$('.editor img').attr('src',(curTile || tile.empty).image.src);
+		}
+		this.isActive = function() {
+			return !!active;
+		}
+		this.showLevelCode = function() {
+			if( !$('.editor-layout').is(':visible') ) {
+				var s = 'toLayout([\n';
+				for( var y=0 ; y<layout.length ; y++ ) {
+					s += '\t"';
+					for( var x=0 ; x<layout[y].length ; x++ ) {
+						s += tileByIndex[layout[y][x]].letter;
+					}
+					s += '"'+(y<layout.length-1 ? ',' : '')+'\n';
+				}
+				s += '])\n';
+				$('.editor-layout').text(s).show();
+			}
+			else {
+				$('.editor-layout').hide();
+			}
+		}
+		
+		$(document).on("keydown",function(e) {
+			if( screen != 'game' ) { return; }
+			if( e.keyCode == 69 /* e */ ) {
+				if( active ) stop(); else start();
+			}
+			if( active ) {
+				var numKey = e.keyCode - 48;
+				if( numKey >= 0 && numKey <= 9 ) {
+					curTile = tileByIndex[numKey] || curTile;
+				}
+			}
+		});
+		
+		$(canvas).on("click", function(e) {
+			if( !active || screen != 'game' ) { return; }
+
+			var cell = getCursorPosition(canvas,e,76,76,76*10,76*10);
+			board.set(cell.x,cell.y,(curTile || tile.empty).index);
+			layout[cell.y][cell.x] = (curTile || tile.empty).index;
+			$('.editor-layout').hide();
+			e.stopPropagation();
+			return false;
+		});
+
+		return this;
+		
+	}
+
 
 	var Player = function(startX, startY){
 		this.x = startX;
 		this.y = startY;
 		this.collected = 0;
 		this.draw = function(){
+			if( editor.isActive() ) { return; }
 			context.drawImage(imageBank.get("player"),this.x*76,this.y*76,candySize,candySize)
 		}
 		return this;
 	}
-	var gameControls = function(e){
-		if (screen != "game"){
-			return;
-		}
-		var lastX = player.x;
-		var lastY = player.y;
+	
+	function move(lastX,lastY) {
+
 		var legal = false;
 
-		//right
-		if (e.keyCode == 39){
-			player.x += 1
-			legal = true;
-		}
-		//left
-		if (e.keyCode == 37){
-			player.x += -1
-			legal = true;
-		}
-		//up
-		if (e.keyCode == 38){
-			player.y += -1
-			legal = true;
-		}
-		//down
-		if (e.keyCode == 40){
-			player.y += 1
-			legal = true;
-		}
-		//reset
-		if (e.keyCode == 82){
-			level.restart();
-			return;
-		}
-		if( !legal ) {
-		    return;
-		}
+		if( player.y == lastY && (player.x == lastX-1 || player.x == lastX+1) ) {
+            legal = true;
+        }
+        if( player.x == lastX && (player.y == lastY-1 || player.y == lastY+1) ) {
+            legal = true;
+        }
 
 		//off board
-		if (player.x < 0 || player.y < 0 || player.x > 9 || player.y > 9){
-			player.x = lastX;
-			player.y = lastY;
-			return;
+		if ( legal && (player.x < 0 || player.y < 0 || player.x > 9 || player.y > 9) ){
+			legal = false;
 		}
 		//blank
-		if ( board.get(player.x,player.y)  == tile.empty.index ||board.get(player.x,player.y) == tile.start.index){
+		if ( legal && (board.get(player.x,player.y)  == tile.empty.index || board.get(player.x,player.y) == tile.start.index) ){
+			legal = false;
+		}
+        if( !legal ) {
 			player.x = lastX;
 			player.y = lastY;
-			return;
-		}
+        	return;
+        }
+		
+		
 		//normal
 		if (board.get(player.x,player.y) == tile.redMint.index){
 			board.set(player.x,player.y,0);
@@ -508,9 +590,75 @@
 			level.complete();
 		}
 	}
+	
+	
+	var onClickCanvas = function(e) {
+		if (screen != "game" || editor.isActive() ){
+			return;
+		}
+        var cell = getCursorPosition(canvas,e,76,76,76*10,76*10);
+        var lastX = player.x;
+        var lastY = player.y;
+        player.x = cell.x;
+        player.y = cell.y;
+        return move(lastX,lastY);
+	}
+	
+	var gameControls = function(e){
+		if (screen != "game" || editor.isActive() ){
+			return;
+		}
+		var lastX = player.x;
+		var lastY = player.y;
+		var legal = false;
 
-	var gameStart = function(gameStartLevel){
-		level.start(gameStartLevel);
+		//right
+		if (e.keyCode == 39){
+			player.x += 1
+			legal = true;
+		}
+		//left
+		if (e.keyCode == 37){
+			player.x += -1
+			legal = true;
+		}
+		//up
+		if (e.keyCode == 38){
+			player.y += -1
+			legal = true;
+		}
+		//down
+		if (e.keyCode == 40){
+			player.y += 1
+			legal = true;
+		}
+		//reset
+		if (e.keyCode == 82){
+			level.restart();
+			return;
+		}
+
+		if( !legal ) {
+		    return;
+		}
+		
+		return move(lastX,lastY);
+	}
+
+	var gameStart = function(forceLevel){
+		progressGet(function(progress){
+			var i = 0;
+			while(progress[i] && progress[i].stars > 0 && i < layoutList.length){
+				i ++;
+			}
+			if(i >= layoutList.length){
+				i = 0;
+			}
+			if( forceLevel !== undefined && forceLevel !== null ) {
+				i = forceLevel;
+			}
+			level.start(i);
+		});
 	}
 
 	var gameComplete = function(){
@@ -569,18 +717,18 @@
 	}
 
 	$(document).ready(function() {
-		canvas = document.getElementById("board");
+		canvas = document.getElementById("boardCanvas");
 		context = canvas.getContext("2d");
 		imageBank = new ImageBank();
 		tile.empty.image = imageBank.load("empty","image/blank.png");
-		tile.start.image = imageBank.load("start","http://www.karting.nl/images/vlaggen/vlag07.gif");
+		tile.start.image = imageBank.load("start","image/start.png");
 		tile.end.image = imageBank.load("end","image/end.png");
 		tile.redMint.image = imageBank.load("red mint","image/redCandy.png");
-		tile.greenMint.image = imageBank.load("green mint","http://cliparts.co/cliparts/Lcd/jL8/LcdjL8bni.png");
-		tile.special.image = imageBank.load("cotton candy","http://vignette3.wikia.nocookie.net/clubpenguin/images/1/15/PinkCottonCandy.png/revision/latest?cb=20150102225153");
-		tile.bridge.image = imageBank.load("candy corn","http://www.clker.com/cliparts/R/s/R/z/3/R/halloween-candy-corn-md.png");
+		tile.greenMint.image = imageBank.load("green mint","image/greenMint.png");
+		tile.special.image = imageBank.load("cotton candy","image/cottonCandy.png");
+		tile.bridge.image = imageBank.load("candy corn","image/candyCorn.png");
 		imageBank.load("player","image/player.png");
-		imageBank.load("redo","http://simpleicon.com/wp-content/uploads/redo-5.png");
+		imageBank.load("redo","image/redo.png");
 		imageBank.load("lock","image/lockedLevel.png");
 		imageBank.load("play","image/iconPlay.png");
 		imageBank.load("levelSelect","image/iconLevelSelect.png");
@@ -593,6 +741,8 @@
 		soundBank.load("levelComplete1","sound/success.mp3");
 		soundBank.load("levelComplete2","sound/success1.mp3");
 		soundBank.load("levelComplete3","sound/successbig.mp3");
+		
+
 		$("button").click(function(){
 			soundBank.play("buttonHit");
 		});
@@ -610,7 +760,7 @@
 		    //startFromTitleScreen = false;
 		}
 		
-		var startLevel = layoutList.length - 1;
+		var startLevel = 15; // null; //layoutList.length - 1;
 		var levelFound = window.location.hash.match( /#(\d+)/ );
 		if( levelFound && levelFound[1] !== undefined ) {
             var possibleStartLevel = parseInt(levelFound[1]) - 1;
@@ -644,7 +794,7 @@
 				Welcome <span class='userName'></span>!
 			</div>
 			<div>
-				<button class="candyButton" onClick="javascript: gameStart(0); $('#titleScreen').hide();">
+				<button class="candyButton" onClick="javascript: gameStart(); $('#titleScreen').hide();">
 					<img src="image/iconPlay.png">
 				</button>
 			</div>
@@ -739,27 +889,39 @@
 	</div>
 
 	<div id="game" class="startHidden layer">
-		<div class="centered">
-			<div class="gamePanel">
-				<canvas width = "760" height = "760" id = "board">
-				</canvas>
+		<div class='centered' style='width:970px;'>
+			<div class="gamePanel" style='width:760px;'>
+				<div style="width:760px; height: 760px; position: absolute; z-index:-1; top: 0px; background-color: white; opacity: 0.2">
+				</div>
+				<div style="width:760px; height: 760px;">
+					<canvas id="boardCanvas" width="760px" height="760px">
+					</canvas>
+				</div>
 			</div>
-			<div class="gamePanel">
-				<div class="score">
+			<div class="gamePanel" style='width:200px;'>
+				<div class="score centered">
 				</div>
-				<div class="levelNumber">
+				<div class="levelNumber centered">
 				</div>
-				<div>
+				<div class="editor centered startHidden">
+					<div>LAYOUT EDITOR</div>
+					<img src='image/blank.png'>
+					<button onClick="javascript: editor.showLevelCode();">
+						VIEW
+					</button>
+					<pre class='editor-layout startHidden'></pre>
+				</div>
+				<div class='centered'>
 					<button class="candyButton" onClick="javascript: level.restart();">
 						<img src="image/redo.png">
 					</button>
 				</div>
-				<div>
+				<div class='centered'>
 					<button class="candyButton" onClick="javascript: level.select();">
 						<img src="image/iconLevelSelect.png">
 					</button>
 				</div>
-				<div id="gameNextLevel">
+				<div id="gameNextLevel" class='centered'>
 					<button class="candyButton" onClick="javascript: level.nextLevel();">
 						<img src="image/nextLevel.png">
 					</button>

@@ -89,7 +89,7 @@ function Cell(x,y) {
     this.y=y;
 }
 
-function getCursorPosition(canvas,e) {
+function getCursorPosition(canvas,e,xSpan,ySpan,xLen,yLen) {
     var x;
     var y;
     if (e.pageX !== undefined && e.pageY !== undefined) {
@@ -102,9 +102,9 @@ function getCursorPosition(canvas,e) {
     }
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
-    x = Math.min(x, 320);
-    y = Math.min(y, 320);
-    var cell = new Cell(Math.floor(x/32), Math.floor(y/32));
+    x = Math.min(x, xLen);
+    y = Math.min(y, yLen);
+    var cell = new Cell(Math.floor(x/xSpan), Math.floor(y/ySpan));
     return cell;
 }
 
