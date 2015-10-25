@@ -83,6 +83,56 @@ var Sequence = function(name,list) {
     Ticker.start(name,0.1,go);
 }
 
+var Internet = function() {
+	var attempt = {};
+	var counter = 0;
+
+	function isEmpty(obj) {
+	    for(var prop in obj) {
+	        if(obj.hasOwnProperty(prop))
+	            return false;
+	    }
+	    return true;
+	}
+	
+	this.retry = function() {
+		for( var handle in attempt ) {
+			attempt[handle]();
+		}
+	}
+	function clear(handle) {
+		delete attempt[handle];
+		if( isEmpty(attempt) ) {
+			$('#internetDown').hide();
+		}
+	}
+	function error(j, textStatus, errorThrown) {
+		if( j.status == 0 ) {
+			$('#internetDown').show();
+		}
+		else {
+			alert(textStatus, errorThrown);
+		}
+	}
+	this.ajax = function(_spec,callback) {
+		var handle = counter++;
+		var spec = $.extend(true,{},_spec);
+		spec.timeout = 10*1000;
+		spec.success = function(data) {
+			clear(handle);
+			callback(data);
+		}
+		spec.error = error;
+		attempt[handle] = function() {
+			$.ajax(spec);
+		}
+		attempt[handle]();
+		return handle;
+	}
+
+	return this;
+}
+
 
 function Cell(x,y) {
     this.x=x;

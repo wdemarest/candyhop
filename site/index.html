@@ -34,6 +34,13 @@
 		width:100%;
 		height:100%;
 	}
+	#internetDown {
+		z-index: 1000;
+	}
+	#internetDown .dialogBox {
+		background-color: #f0d0d0;
+		padding: 20px;
+	}
 	.startHidden {
 		display: none;
 	}
@@ -61,13 +68,19 @@
 	#game .levelNumber{
 	    font-size: 40px;
 	}
+	#game .levelName{
+	    font-size: 18px;
+	}
+	#game #levelSkip{
+	    font-size: 30px;
+	}
 	#game .score, #levelComplete .score {
 		font-size: 60px;
 	}
 	#levelComplete {
 		z-index:100;
 	}
-	.whiteBox {
+	.dialogBox {
 		width: 700px;
 		margin: auto;
 		margin-top: 50px;
@@ -122,6 +135,8 @@
 </script>
 <script src="howler.js">
 </script>
+<script src="editor.js">
+</script>
 <script src="levels.js">
 </script>
 <script>
@@ -136,6 +151,7 @@
 	var level;
 	var board;
 	var editor;
+	var internet = new Internet();
 
 	var tile = {
 	    empty: { index: 0, name: "empty", letter: ' '},
@@ -144,7 +160,8 @@
 	    redMint: { index: 3, name: "red mint", letter: '.', points: 10},
 	    greenMint: { index: 4, name: "green mint", letter: 'g', points: 20},
 	    special: { index: 5, name: "special", letter: '+', points: 50},
-	    bridge: { index: 6, name: "bridge", letter: 'b', points: 30}
+	    bridge: { index: 6, name: "bridge", letter: 'b', points: 30},
+	    uncollectable: { index: 7, name: "uncollectable", letter: 'u'}
 	}
 	var tileByIndex = [];
 	for( var i in tile ) {
@@ -154,7 +171,7 @@
 	for( var i in tile ) {
 	    tileByLetter[tile[i].letter] = tile[i];
 	}
-
+	
 	function readCookie(name) {
 		var nameEQ = name + "=";
 		var ca = document.cookie.split(';');
@@ -254,8 +271,8 @@
 			score += amount;
 		}
 		
-		this.getLayout = function() {
-			return layoutList[levelNumber];
+		var getLayout = this.getLayout = function() {
+			return layoutList[levelNumber].map;
 		}
 		
 		function tutorial(x, y){
@@ -295,6 +312,7 @@
 			player.draw();
 			$("#game .score").html(score+"/"+scoreMax);
 			$("#game .levelNumber").html("Level "+(levelNumber+1))
+			$("#game .levelName").html(layoutList[levelNumber].name)
 			tutorial(player.x, player.y);
 		}
 
@@ -379,15 +397,28 @@
 				alert("this level "+levelNumber+" does not exist");
 				return;
 			}
-			board = new Board(layoutList[levelNumber]);
+			board = new Board(getLayout(levelNumber));
 			board.findStart();
 			score = 0;
 			scoreMax = board.findMax();
 			player = new Player(board.startX, board.startY);
+			$("#tutorial").hide();
+			$("#levelSkip").hide();
 			$("#gameNextLevel").hide();
 			progressGet(function(progress){
 				if(progress[levelNumber] && progress[levelNumber].stars > 0 && levelNumber+1 < layoutList.length){
 					$("#gameNextLevel").show();
+					if(progress[levelNumber].tries % 3 == 0){
+						$("#levelSkip").show().html("You can skip to the next level any time.");
+					}
+				}
+				else{
+					if(progress[levelNumber] && progress[levelNumber].tries >= 3){
+						$("#levelSkip").show().html("Get at least one star to proceed.");
+					}
+					if(progress[levelNumber] && progress[levelNumber].tries >= 6){
+						$("#levelSkip").show().html("You can pass this level with only one star.");
+					}
 				}
 			})
 			$("#game").show();
@@ -450,77 +481,6 @@
 		 	
 		}
 	}
-	
-	var Editor = function() {
-		var active = false;
-		var curTile = null;
-		var layout = null;
-		function start() {
-			$('.editor').show();
-			Ticker.start("editorDraw",0.1,draw);
-			layout = level.getLayout();
-			board = new Board(layout);
-			active = true;
-		}
-		function stop() {
-			$('.editor').hide();
-			Ticker.stop("editorDraw");
-			active = false;
-			level.restart();
-		}
-		function draw() {
-			if( screen != 'game' ) { return; }
-			$('.editor img').attr('src',(curTile || tile.empty).image.src);
-		}
-		this.isActive = function() {
-			return !!active;
-		}
-		this.showLevelCode = function() {
-			if( !$('.editor-layout').is(':visible') ) {
-				var s = 'toLayout([\n';
-				for( var y=0 ; y<layout.length ; y++ ) {
-					s += '\t"';
-					for( var x=0 ; x<layout[y].length ; x++ ) {
-						s += tileByIndex[layout[y][x]].letter;
-					}
-					s += '"'+(y<layout.length-1 ? ',' : '')+'\n';
-				}
-				s += '])\n';
-				$('.editor-layout').text(s).show();
-			}
-			else {
-				$('.editor-layout').hide();
-			}
-		}
-		
-		$(document).on("keydown",function(e) {
-			if( screen != 'game' ) { return; }
-			if( e.keyCode == 69 /* e */ ) {
-				if( active ) stop(); else start();
-			}
-			if( active ) {
-				var numKey = e.keyCode - 48;
-				if( numKey >= 0 && numKey <= 9 ) {
-					curTile = tileByIndex[numKey] || curTile;
-				}
-			}
-		});
-		
-		$(canvas).on("click", function(e) {
-			if( !active || screen != 'game' ) { return; }
-
-			var cell = getCursorPosition(canvas,e,76,76,76*10,76*10);
-			board.set(cell.x,cell.y,(curTile || tile.empty).index);
-			layout[cell.y][cell.x] = (curTile || tile.empty).index;
-			$('.editor-layout').hide();
-			e.stopPropagation();
-			return false;
-		});
-
-		return this;
-		
-	}
-
 
 	var Player = function(startX, startY){
 		this.x = startX;
@@ -583,7 +543,10 @@
 			level.scoreAdd(tile.bridge.points)
 			board.makeBridge(player.x, player.y, player.x-lastX,  player.y-lastY);
 		}
-		
+		//uncollectable
+		if (board.get(player.x,player.y) == tile.uncollectable.index){
+			//do nothing
+		}
 		//end
 		if (board.get(player.x,player.y) == tile.end.index){
 			level.scoreAdd(tile.end.points)
@@ -682,22 +645,18 @@
 		});
 
 	}
+
     var progressGet = function(callback) {
-		$.ajax({
+    	internet.ajax({
 			url: '/progress',
 			method: 'GET',
 			contentType:"application/json; charset=utf-8",
 			data: {},
-			success: function(data) {
-				callback(data);
-			},
-			error: function(jqXHR, textStatus) {
-				alert(textStatus);
-			}
-		});
+		}, callback );
 	}
+	
 	var progressSave = function(levelNumber,pointsCollected,stars,callback) {
-		$.ajax({
+		internet.ajax({
 			url: '/progress',
 			method: 'POST',
 			contentType:"application/json; charset=utf-8",
@@ -705,15 +664,8 @@
 			    level: levelNumber,
 			    points: pointsCollected,
 			    stars: stars
-			}),
-			success: function(data) {
-				callback(data);
-			},
-			error: function(jqXHR, textStatus) {
-				alert(textStatus);
-			}
-		});
-
+			})
+		}, callback);
 	}
 
 	$(document).ready(function() {
@@ -727,6 +679,7 @@
 		tile.greenMint.image = imageBank.load("green mint","image/greenMint.png");
 		tile.special.image = imageBank.load("cotton candy","image/cottonCandy.png");
 		tile.bridge.image = imageBank.load("candy corn","image/candyCorn.png");
+		tile.uncollectable.image = imageBank.load("uncollectable","image/grass.png");
 		imageBank.load("player","image/player.png");
 		imageBank.load("redo","image/redo.png");
 		imageBank.load("lock","image/lockedLevel.png");
@@ -755,12 +708,12 @@
         }
 
 		//soundBank.play("ambient").loop(true);
-		var startFromTitleScreen = false;
+		var startFromTitleScreen = true;
 		if(readCookie('isAdmin') == 1){
 		    //startFromTitleScreen = false;
 		}
 		
-		var startLevel = 15; // null; //layoutList.length - 1;
+		var startLevel; //layoutList.length - 1;
 		var levelFound = window.location.hash.match( /#(\d+)/ );
 		if( levelFound && levelFound[1] !== undefined ) {
             var possibleStartLevel = parseInt(levelFound[1]) - 1;
@@ -784,9 +737,18 @@
 </head>
 
 <body>
-
+	<div id="internetDown" class="startHidden layer">
+		<div class="dialogBox">
+			<div class="heading">
+				Internet Connection Lost
+			</div>
+			<button onClick="javascript: internet.retry();">
+				Retry Connection
+			</button>
+		</div>
+	</div>
 	<div id="titleScreen" class="startHidden layer">
-		<div class="whiteBox">
+		<div class="dialogBox">
 			<div class="heading">
 				Candy Hop
 			</div>
@@ -824,7 +786,7 @@
 
 
 	<div id="levelSelect" class="startHidden layer">
-		<div class="whiteBox">
+		<div class="dialogBox">
 			<div class="heading">
 				Choose a Level
 			</div>
@@ -838,7 +800,7 @@
 		</div>
 	</div>
 	<div id="levelComplete" class="startHidden layer">
-		<div class="whiteBox">
+		<div class="dialogBox">
 			<div class="heading">
 
 				Level Complete!
@@ -876,7 +838,7 @@
 	</div>
 
 	<div id="gameComplete" class="startHidden layer">
-		<div class="whiteBox">
+		<div class="dialogBox">
 			<div class="heading">
 				Congratulations!!!
 			</div>
@@ -903,9 +865,12 @@
 				</div>
 				<div class="levelNumber centered">
 				</div>
+				<div class="levelName centered">
+				</div>
 				<div class="editor centered startHidden">
 					<div>LAYOUT EDITOR</div>
 					<img src='image/blank.png'>
+					Tiles are 1-7
 					<button onClick="javascript: editor.showLevelCode();">
 						VIEW
 					</button>
@@ -925,6 +890,9 @@
 					<button class="candyButton" onClick="javascript: level.nextLevel();">
 						<img src="image/nextLevel.png">
 					</button>
+				</div>
+				<div id="levelSkip">
+					
 				</div>
 			</div>
 			<div id="tutorial">
