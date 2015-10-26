@@ -127,6 +127,10 @@
 		height: 50px;
 		margin-bottom: 4px;
 	}
+	.solver {
+		background-color: blue;
+		cursor: pointer;
+	}
     
 </style>
 <script src="https://code.jquery.com/jquery-2.1.4.js">
@@ -136,6 +140,8 @@
 <script src="howler.js">
 </script>
 <script src="editor.js">
+</script>
+<script src="solver.js">
 </script>
 <script src="levels.js">
 </script>
@@ -152,6 +158,8 @@
 	var board;
 	var editor;
 	var internet = new Internet();
+	var solver = new Solver('.solver');
+
 
 	var tile = {
 	    empty: { index: 0, name: "empty", letter: ' '},
@@ -209,6 +217,9 @@
 		var set = this.set = function(x,y,newValue){
 			layout[y][x] = newValue
 		}
+		this.getLayout = function() {
+			return layout;
+		}
         
         this.makeBridge = function(x, y, dX, dY){
             
@@ -247,7 +258,9 @@
 			}
 			return max;
 		}
-		this.draw = function(){
+		this.draw = function(forceLayout){
+			var layoutOld = layout;
+			layout = forceLayout || layout;
 			for(var mintY = 0; mintY < 10; mintY ++){
 				for(var mintX = 0; mintX < 10; mintX ++){
 				    var tile = getTile(mintX, mintY);
@@ -257,6 +270,7 @@
 				    context.drawImage(tile.image,mintX * 76,mintY * 76,candySize,candySize)
 				}
 			}
+			layout = layoutOld;
 		}
         
 		return this;
@@ -307,6 +321,7 @@
 		}
 		
 		var tick = function(){
+			solver.tick();
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			board.draw();
 			player.draw();
@@ -392,6 +407,7 @@
 			screen = "game";
 			shutDown();
 
+			solver.reset();
 			levelNumber = newLevelNumber;
 			if (levelNumber<0 || levelNumber>=layoutList.length){
 				alert("this level "+levelNumber+" does not exist");
@@ -492,7 +508,7 @@
 		}
 		return this;
 	}
-	
+
 	function move(lastX,lastY) {
 
 		var legal = false;
@@ -598,6 +614,11 @@
 		//reset
 		if (e.keyCode == 82){
 			level.restart();
+			return;
+		}
+		//solver
+		if (e.keyCode == 83){
+			solver.togglePause();
 			return;
 		}
 
@@ -866,6 +887,8 @@
 				<div class="levelNumber centered">
 				</div>
 				<div class="levelName centered">
+				</div>
+				<div class="solver centered">
 				</div>
 				<div class="editor centered startHidden">
 					<div>LAYOUT EDITOR</div>
