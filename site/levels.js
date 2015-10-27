@@ -61,8 +61,8 @@ var createLevels = function(){
        	name: "Many Paths",
         map: [
             [0,0,0,0,0,0,0,0,0,0],
-            [3,3,3,3,3,3,3,3,3,3],
-            [3,1,3,3,0,0,3,3,2,3],
+            [5,3,3,3,3,3,3,3,3,3],
+            [3,1,5,5,0,0,5,5,2,3],
             [3,3,3,3,3,3,3,3,3,3],
             [3,3,3,3,3,3,3,3,3,3],
             [0,0,0,0,0,0,0,0,0,0],
@@ -523,11 +523,67 @@ var createLevels = function(){
 			"  u       ",
 			"  u       ",
 			"  ub      ",
-			"  S  uE   ",
+			"  S   E   ",
 			"          ",
 			"          ",
 			"          "
 	])});
+	list.push({
+       	name: "Fake",
+        map: toLayout([
+			"          ",
+			"          ",
+			"          ",
+			"          ",
+			"   E      ",
+			"Sgb       ",
+			" .  b.   .",
+			" .........",
+			"          ",
+			"          "
+	])});
+	list.push({
+       	name: "Patience",
+        map: toLayout([
+			"          ",
+			"          ",
+			" S....... ",
+			" ..     . ",
+			" b.    b. ",
+			"          ",
+			"          ",
+			" E        ",
+			"          ",
+			"          "
+	])})
+	list.push({
+       	name: "Fuller Fuller House",
+        map: toLayout([
+			"Sbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"Ebbbbbbbbb"
+])})
+list.push({
+       	name: "Circle",
+        map: toLayout([
+			" u      u ",
+			"u b    b u",
+			" b      b ",
+			"          ",
+			"   E      ",
+			"          ",
+			"          ",
+			" b.b    b ",
+			" Sgg.  b u",
+			"        u "
+])})
 
         return list;
     };

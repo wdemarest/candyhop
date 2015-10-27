@@ -258,16 +258,28 @@
 			}
 			return max;
 		}
+		var tileLast = [];
+		var drawImage = this.drawImage = function(x,y,overImage) {
+			var tile = getTile(x, y);
+			if( tile === undefined || (tile.index===tileLast[y*10+x] && !overImage) ) {
+		        return;
+		    }
+
+			context.clearRect(x * 76,y * 76,candySize,candySize);
+			context.drawImage(tile.image,x * 76,y * 76,candySize,candySize);
+			tileLast[y*10+x] = tile.index;
+			if( overImage ) {
+				context.drawImage(overImage,x * 76,y * 76,candySize,candySize)
+			}
+			
+		}
+		
 		this.draw = function(forceLayout){
 			var layoutOld = layout;
 			layout = forceLayout || layout;
 			for(var mintY = 0; mintY < 10; mintY ++){
 				for(var mintX = 0; mintX < 10; mintX ++){
-				    var tile = getTile(mintX, mintY);
-				    if( tile === undefined ) {
-				        continue;
-				    }
-				    context.drawImage(tile.image,mintX * 76,mintY * 76,candySize,candySize)
+				    drawImage(mintX,mintY);
 				}
 			}
 			layout = layoutOld;
@@ -322,7 +334,6 @@
 		
 		var tick = function(){
 			solver.tick();
-			context.clearRect(0, 0, canvas.width, canvas.height);
 			board.draw();
 			player.draw();
 			$("#game .score").html(score+"/"+scoreMax);
@@ -499,12 +510,17 @@
 	}
 
 	var Player = function(startX, startY){
+		var lastX = 0;
+		var lastY = 0;
 		this.x = startX;
 		this.y = startY;
 		this.collected = 0;
 		this.draw = function(){
 			if( editor.isActive() ) { return; }
-			context.drawImage(imageBank.get("player"),this.x*76,this.y*76,candySize,candySize)
+			board.drawImage(lastX,lastY,imageBank.get("empty"));
+			board.drawImage(this.x,this.y,imageBank.get("player"));
+			lastX = this.x;
+			lastY = this.y;
 		}
 		return this;
 	}
