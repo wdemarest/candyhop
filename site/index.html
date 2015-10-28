@@ -52,6 +52,10 @@
 		float: none;
 		margin-left: auto;
 		margin-right: auto;
+		text-align: center;
+	}
+	button.centered {
+		display:block;
 	}
 	#game .gamePanel {
 		vertical-align: top;
@@ -919,18 +923,18 @@
 					</button>
 					<pre class='editor-layout startHidden'></pre>
 				</div>
-				<div class='centered'>
-					<button class="candyButton" onClick="javascript: level.restart();">
+				<div>
+					<button class="candyButton centered" onClick="javascript: level.restart();">
 						<img src="image/redo.png">
 					</button>
 				</div>
-				<div class='centered'>
-					<button class="candyButton" onClick="javascript: level.select();">
+				<div>
+					<button class="candyButton centered" onClick="javascript: level.select();">
 						<img src="image/iconLevelSelect.png">
 					</button>
 				</div>
-				<div id="gameNextLevel" class='centered'>
-					<button class="candyButton" onClick="javascript: level.nextLevel();">
+				<div id="gameNextLevel">
+					<button class="candyButton centered" onClick="javascript: level.nextLevel();">
 						<img src="image/nextLevel.png">
 					</button>
 				</div>
