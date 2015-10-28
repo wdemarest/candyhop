@@ -49,7 +49,9 @@ if( !fs.existsSync(config.userDataFile) ) {
 			userEmail: "",  
 			progress: [],
 			isAdmin: 1,
-			isUnlocked: 1
+			isUnlocked: 1,
+			mayEdit: 1,
+			maySolve: 1
 		}
 	},null,4));
 }
@@ -214,7 +216,9 @@ function login(req,res) {
 		req.session.userEmail = userData.userEmail || '';
 		req.session.userName = userData.userName || '';
 		req.session.isAdmin = userData.isAdmin || 0;
-		req.session.isUnlocked = userData.isUnlocked || 0;
+		req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
+		req.session.mayEdit = userData.mayEdit || userData.isAdmin || 0;
+		req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
 	}
 
 	console.log( response);
@@ -326,6 +330,8 @@ function serverStart() {
 		res.cookie('userName', req.session ? req.session.userName : null);
 		res.cookie('isAdmin', req.session ? req.session.isAdmin : null);
 		res.cookie('isUnlocked', req.session ? req.session.isUnlocked : null);
+		res.cookie('mayEdit', req.session ? req.session.mayEdit : null);
+		res.cookie('maySolve', req.session ? req.session.maySolve : null);
 		res.cookie('userEmail', req.session ? req.session.userEmail : null);
 		return next();
 	});
@@ -342,7 +348,24 @@ function serverStart() {
 		res.send( "Payment Complete" );
 	});
 
-	app.use( serveStatic(config.sitePath, {'index': ['index.html']}) );
+	var siteServer = serveStatic(config.sitePath, {'index': ['index.html']});
+
+	app.get( "/editor.js", function(req,res) {
+		if( req.session && req.session.mayEdit ) {
+			return siteServer(req,res);
+		}
+		res.send('');
+	});
+
+	app.get( "/solver.js", function(req,res) {
+		if( req.session && req.session.maySolve ) {
+			return siteServer(req,res);
+		}
+		res.send('');
+	});
+
+
+	app.use( siteServer );
 
 	app.theServer = http.createServer(app);
 	app.theServer.listen(config.port);

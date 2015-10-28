@@ -330,9 +330,6 @@ var Solver = function(selector) {
 	var solution = null;
 	var running = false;
 	this.togglePause = function() {
-		if(readCookie("isAdmin") != "1"){
-			return;
-		}
 		paused = !paused;
 		running = false;
 		if( !paused ) {

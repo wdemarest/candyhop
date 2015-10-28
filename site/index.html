@@ -158,7 +158,7 @@
 	var board;
 	var editor;
 	var internet = new Internet();
-	var solver = new Solver('.solver');
+	var solver = window.Solver ? new Solver('.solver') : null;
 
 
 	var tile = {
@@ -258,16 +258,28 @@
 			}
 			return max;
 		}
+		
+		var tileLast = [];
+		var drawImage = this.drawImage = function(x,y,overImage) {
+			var tile = getTile(x, y);
+			if( tile === undefined || (tile.index===tileLast[y*10+x] && !overImage) ) {
+		        return;
+		    }
+
+			context.clearRect(x * 76,y * 76,candySize,candySize);
+			context.drawImage(tile.image,x * 76,y * 76,candySize,candySize);
+			tileLast[y*10+x] = tile.index;
+			if( overImage ) {
+				context.drawImage(overImage,x * 76,y * 76,candySize,candySize)
+			}
+			
+		}
 		this.draw = function(forceLayout){
 			var layoutOld = layout;
 			layout = forceLayout || layout;
 			for(var mintY = 0; mintY < 10; mintY ++){
 				for(var mintX = 0; mintX < 10; mintX ++){
-				    var tile = getTile(mintX, mintY);
-				    if( tile === undefined ) {
-				        continue;
-				    }
-				    context.drawImage(tile.image,mintX * 76,mintY * 76,candySize,candySize)
+				    drawImage(mintX,mintY);
 				}
 			}
 			layout = layoutOld;
@@ -319,13 +331,13 @@
 				$("#tutorial").html("Cotton candies give you more points!")
 			}
 		}
+		
 		var solverSpeed = 5;
 		var solverCount = 0;
 		var tick = function(){
 			if(solverCount++ % solverSpeed == 0){
-				solver.tick();
+				if( solver ) { solver.tick(); }
 			}
-			context.clearRect(0, 0, canvas.width, canvas.height);
 			board.draw();
 			player.draw();
 			$("#game .score").html(score+"/"+scoreMax);
@@ -410,7 +422,7 @@
 			screen = "game";
 			shutDown();
 
-			solver.reset();
+			if( solver ) solver.reset();
 			levelNumber = newLevelNumber;
 			if (levelNumber<0 || levelNumber>=layoutList.length){
 				alert("this level "+levelNumber+" does not exist");
@@ -445,7 +457,7 @@
 			$(canvas).on("click", function(e) {
 				onClickCanvas(e);
 			});
-			editor = new Editor();
+			editor = window.Editor ? new Editor() : null;
 
 			Ticker.start("tick",0.05,tick);
 		}
@@ -502,12 +514,17 @@
 	}
 
 	var Player = function(startX, startY){
+		var lastX = 0;
+		var lastY = 0;
 		this.x = startX;
 		this.y = startY;
 		this.collected = 0;
 		this.draw = function(){
-			if( editor.isActive() ) { return; }
-			context.drawImage(imageBank.get("player"),this.x*76,this.y*76,candySize,candySize)
+			if( editor && editor.isActive() ) { return; }
+			board.drawImage(lastX,lastY,imageBank.get("empty"));
+			board.drawImage(this.x,this.y,imageBank.get("player"));
+			lastX = this.x;
+			lastY = this.y;
 		}
 		return this;
 	}
@@ -575,7 +592,7 @@
 	
 	
 	var onClickCanvas = function(e) {
-		if (screen != "game" || editor.isActive() ){
+		if (screen != "game" || (editor && editor.isActive()) ){
 			return;
 		}
         var cell = getCursorPosition(canvas,e,76,76,76*10,76*10);
@@ -587,7 +604,7 @@
 	}
 	
 	var gameControls = function(e){
-		if (screen != "game" || editor.isActive() ){
+		if (screen != "game" || (editor && editor.isActive()) ){
 			return;
 		}
 		var lastX = player.x;
@@ -621,7 +638,7 @@
 		}
 		//solver
 		if (e.keyCode == 83){
-			solver.togglePause();
+			if( solver ) solver.togglePause();
 			return;
 		}
 
@@ -897,7 +914,7 @@
 					<div>LAYOUT EDITOR</div>
 					<img src='image/blank.png'>
 					Tiles are 1-7
-					<button onClick="javascript: editor.showLevelCode();">
+					<button onClick="javascript: return editor ? editor.showLevelCode() : null;">
 						VIEW
 					</button>
 					<pre class='editor-layout startHidden'></pre>
