@@ -41,6 +41,9 @@ var Editor = function() {
 	}
 	
 	$(document).on("keydown",function(e) {
+		if(readCookie("isAdmin") != "1"){
+			return;
+		}
 		if( screen != 'game' ) { return; }
 		if( e.keyCode == 69 /* e */ ) {
 			if( active ) stop(); else start();
