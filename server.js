@@ -88,7 +88,7 @@ function escapeHtml(text) {
 
 var payment = {};
 payment.create = function(req,res) {
-	var port = req.app.settings.port || config.port;
+	var port = config.portExternal;
 	var myUrl = req.protocol + '://' + req.hostname  + ( port == 80 || port == 443 ? '' : ':'+port );
 	//console.log("I think I am at "+myUrl)
 	
