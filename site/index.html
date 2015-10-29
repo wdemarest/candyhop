@@ -173,7 +173,7 @@
 	    greenMint: { index: 4, name: "green mint", letter: 'g', points: 20},
 	    special: { index: 5, name: "special", letter: '+', points: 50},
 	    bridge: { index: 6, name: "bridge", letter: 'b', points: 30},
-	    uncollectable: { index: 7, name: "uncollectable", letter: 'u'}
+	    antibridge: { index: 7, name: "antibridge", letter: 'a', points: 30}
 	}
 	var tileByIndex = [];
 	for( var i in tile ) {
@@ -240,6 +240,32 @@
                 soundBank.play("buttonHit");
                 //hack for touching global
                 level.upMax(tile.redMint.points);
+            }
+        }
+        this.makeAntiBridge = function(x, y, dX, dY){
+            
+            function onBoard(x, y){
+			    return x >= 0 && y >= 0 && x <= 9 && y <= 9;
+            }
+            function isEmpty(x, y){
+                return get(x, y) == tile.empty.index;
+            }
+            while(onBoard(x + dX, y + dY) && !isEmpty(x + dX, y + dY)){
+                x += dX;
+                y += dY;
+                var myTile = getTile(x, y);
+
+                if(myTile.index == tile.redMint.index || myTile.index == tile.special.index || myTile.index == tile.bridge.index || myTile.index == tile.antibridge.index){
+                	set(x,y,tile.empty.index);
+	               	//hack for touching global
+	                level.upMax(-myTile.points);
+                }
+                if(myTile.index == tile.greenMint.index){
+                	set(x,y,tile.redMint.index);
+                	//hack for touching global
+	                level.upMax(-(tile.greenMint.points - tile.redMint.points));
+                }
+                soundBank.play("buttonHit");
             }
         }
 
@@ -583,9 +609,11 @@
 			level.scoreAdd(tile.bridge.points)
 			board.makeBridge(player.x, player.y, player.x-lastX,  player.y-lastY);
 		}
-		//uncollectable
-		if (board.get(player.x,player.y) == tile.uncollectable.index){
-			//do nothing
+		//antibridge
+		if (board.get(player.x,player.y) == tile.antibridge.index){
+			board.set(player.x,player.y,0);
+			level.scoreAdd(tile.antibridge.points)
+			board.makeAntiBridge(player.x, player.y, player.x-lastX,  player.y-lastY);
 		}
 		//end
 		if (board.get(player.x,player.y) == tile.end.index){
@@ -724,7 +752,7 @@
 		tile.greenMint.image = imageBank.load("green mint","image/greenMint.png");
 		tile.special.image = imageBank.load("cotton candy","image/cottonCandy.png");
 		tile.bridge.image = imageBank.load("candy corn","image/candyCorn.png");
-		tile.uncollectable.image = imageBank.load("uncollectable","image/grass.png");
+		tile.antibridge.image = imageBank.load("antibridge","image/antiCorn.png");
 		imageBank.load("player","image/player.png");
 		imageBank.load("redo","image/redo.png");
 		imageBank.load("lock","image/lockedLevel.png");

@@ -482,8 +482,20 @@ var createLevels = function(){
 			"  ggg g   ",
 			"  .   g.  "
 	])});
-		// medium - bridge zipper with a twi
-		//very hard
+	list.push({
+       	name: "Patience",
+        map: toLayout([
+			"          ",
+			"          ",
+			" S....... ",
+			" ..     . ",
+			" b.    b. ",
+			"          ",
+			"          ",
+			" E        ",
+			"          ",
+			"          "
+	])})
     list.push({
        	name: "Let Down The Ropes",
         map: toLayout([
@@ -529,20 +541,6 @@ var createLevels = function(){
             "    ..  b "
     ])});
 	list.push({
-       	name: "Patience",
-        map: toLayout([
-			"          ",
-			"          ",
-			" S....... ",
-			" ..     . ",
-			" b.    b. ",
-			"          ",
-			"          ",
-			" E        ",
-			"          ",
-			"          "
-	])})
-	list.push({
        	name: "Fuller Fuller House",
         map: toLayout([
 			"Sbbbbbbbbb",
@@ -560,15 +558,85 @@ list.push({
        	name: "Circle",
         map: toLayout([
 			"..      ..",
-			". b    b .",
+			".gb    bg.",
 			" b      b ",
 			"          ",
 			"   E      ",
 			"          ",
 			"          ",
 			" b.b    b ",
-			" Sgg.  b .",
+			" Sgg.  bg.",
 			"        .."
+])})
+list.push({
+       	name: "Intro To Antibridges",
+        map: toLayout([
+			"      E   ",
+			"      .   ",
+			"      .   ",
+			"      .   ",
+			"S.....a...",
+			"          ",
+			"          ",
+			"          ",
+			"          ",
+			"          "
+])})
+list.push({
+       	name: "Direction",
+        map: toLayout([
+			"          ",
+			"          ",
+			"   gg     ",
+			"  Sga....E",
+			"   .g.    ",
+			"    .     ",
+			"    .     ",
+			"    .     ",
+			"    .     ",
+			"          "
+])})
+list.push({
+       	name: "Direction",
+        map: toLayout([
+			"     E    ",
+			"  Sgagggg ",
+			"   .    . ",
+			"   .    . ",
+			"   .    . ",
+			"   ...... ",
+			"          ",
+			"          ",
+			"          ",
+			"          "
+])})
+list.push({
+       	name: "Close The Hole",
+        map: toLayout([
+			"    .     ",
+			"    .   E ",
+			"    .   . ",
+			"  gb   ag ",
+			"  g .   . ",
+			"  g .   . ",
+			"  g a   . ",
+			"  ggg.... ",
+			"   .      ",
+			"   S      "
+])})
+list.push({
+       	name: "Sneaky Gap",
+        map: toLayout([
+			"   S      ",
+			"   g..    ",
+			"  .g b    ",
+			"  ggg     ",
+			"  g a     ",
+			"  ga.....E",
+			"          ",
+			"          ",
+			"          ",
+			"          "
 ])})
 
         return list;
