@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CandyHop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script>
+	function readCookie(name) {
+		var nameEQ = name + "=";
+		var ca = document.cookie.split(';');
+		for( var i = 0; i < ca.length; i++ ) {
+			var c = ca[i];
+			while( c.charAt(0) == ' ' ) c = c.substring(1, c.length);
+			if (c.indexOf(nameEQ) == 0) return unescape( c.substring(nameEQ.length, c.length) );
+		}
+		return null;
+	}
+	
+	function getParameterByName(name) {
+	    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+
+	$(document).ready(function() {
+		var paymentResult = getParameterByName('pay');
+		if( paymentResult == 'success' ) {
+			$('#buy-success').modal('show');
+		}
+		else
+		if( paymentResult  ) {
+			$('#failMessage').html(paymentResult);
+			$('#buy-failure').modal('show');
+		}
+	})
+
+</script>
+</head>
+<body>
+<div id="buy-success" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Purchase Successful!</h4>
+			</div>
+			<div class="modal-body">
+				<p>You can now start the game. Good Luck!</p>
+			</div>
+			<div class="modal-footer">
+				<a type="button" class="btn btn-primary" href="/welcome.html">Logout</a>&nbsp;
+				<a type="button" class="btn btn-primary" href="/index.html">Play Now</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="buy-failure" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Purchase Failed</h4>
+			</div>
+			<div class="modal-body">
+				<p>Sorry, but your purchase did not go through.</p>
+				<p id='failMessage'></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Try Again</button>
+				<a type="button" class="btn btn-primary" href="/welcome.html">Skip It</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container">
+	<div class="jumbotron text-center">
+		<h1>Candy Hop</h1>
+		<i class="fa-li fa fa-check-square-o"></i>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<p class="lead">How to Purchase CandyHop</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" style="margin:8px;">
+			Candy Hop is $5. Click the button to pay now and activate your account.
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" style="margin:8px;">
+			<a href='/payment_create'>
+				<img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;">
+			</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" style="margin:8px; margin-left:30px;">
+				<a class="spacer" href="/welcome.html">or cancel</a>
+		</div>
+	</div>
+</div>
+</body>

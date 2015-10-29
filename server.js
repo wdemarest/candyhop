@@ -3,6 +3,7 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var serveStatic = require('serve-static');
+var mkdirp = require('mkdirp');
 var url = require('url');
 var fs = require('fs');
 var session = require('express-session');
@@ -24,10 +25,21 @@ Sample config
 	"userDataFile": "userdata.json"
 }
 */
-var mkdirp = require('mkdirp');
+
+config.paypal.host = config.livePayments ? 'api.paypal.com' : 'api.sandbox.paypal.com';
+config.paypal.mode = config.livePayments ? 'live' : 'sandbox';
+paypal.configure(config.paypal);
+
 if( !fs.existsSync('./sessions') ) {
-	console.log("Creatingng /sessions directory.");
+	console.log("Creating /sessions directory.");
 	mkdirp('./sessions', function(err) {
+		if( err ) console.log(err);
+	});
+}
+
+if( !fs.existsSync('./payments') ) {
+	console.log("Creating /payments directory.");
+	mkdirp('./payments', function(err) {
 		if( err ) console.log(err);
 	});
 }
@@ -46,12 +58,13 @@ if( !fs.existsSync(config.userDataFile) ) {
 	fs.writeFileSync(config.userDataFile,JSON.stringify({
 		"admin": {
 			userName: "admin",
-			userEmail: "",  
-			progress: [],
+			userEmail: "",
+			paid: 1,
 			isAdmin: 1,
 			isUnlocked: 1,
 			mayEdit: 1,
-			maySolve: 1
+			maySolve: 1,
+			progress: []
 		}
 	},null,4));
 }
@@ -71,6 +84,81 @@ function escapeHtml(text) {
 	};
 
 	return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+var payment = {};
+payment.create = function(req,res) {
+	var port = req.app.settings.port || config.port;
+	var myUrl = req.protocol + '://' + req.hostname  + ( port == 80 || port == 443 ? '' : ':'+port );
+	//console.log("I think I am at "+myUrl)
+	
+	var payment = {
+		"intent": "sale",
+		"payer": {
+			"payment_method": "paypal"
+		},
+		"redirect_urls": {
+			"return_url": myUrl+"/payment_execute",
+			"cancel_url": myUrl+"/payment_cancel"
+		},
+		"transactions": [{
+			"amount": {
+				"total": "5.00",
+				"currency": "USD"
+			},
+		"description": "Purchase CandyHop"
+		}]
+	};
+	
+	paypal.payment.create(payment, function (error, payment) {
+		if (error) {
+			console.log(error);
+			res.send("payment_create error"+JSON.stringify(error,null,4));
+		} else {
+			if(payment.payer.payment_method === 'paypal') {
+				req.session.paymentId = payment.id;
+				var redirectUrl;
+				for(var i=0; i < payment.links.length; i++) {
+					var link = payment.links[i];
+					if (link.method === 'REDIRECT') {
+						redirectUrl = link.href;
+					}
+				}
+				res.redirect(redirectUrl);
+			}
+		}
+	});
+}
+
+payment.execute = function(req,res) {
+	var userName = req.session.userName;
+	var paymentId = req.session.paymentId;
+	var payerId = req.param('PayerID');
+
+	var details = { "payer_id": payerId };
+	paypal.payment.execute(paymentId, details, function (error, payment) {
+		//console.log(payment);
+		if (error) {
+			console.log("User "+userName+" failed to pay");
+			console.log(error);
+			res.redirect('/buy.html?pay=failure')
+		} else {
+			console.log("User "+userName+" paid");
+			var paymentFile = 'payments/'+(config.livePayments?'':'TEST_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
+			console.log("Saving to "+paymentFile);
+			fs.writeFileSync(paymentFile, JSON.stringify(payment,null,4));
+			var userData = userDataRead(userName);
+			userDataWrite(userName,function(userData) {
+				userData.paid = 1;
+				req.session.paid = userData.paid;
+				res.redirect('/buy.html?pay=success')
+			});
+		}
+	});
+}
+
+payment.cancel = function(req,res) {
+	res.redirect("/welcome.html");
 }
 
 function emailSubmit(req, res) {
@@ -109,7 +197,7 @@ function userDataRead(userName) {
 
 function userDataWrite(userName,fn) {
 	var userData = JSON.parse( fs.readFileSync(config.userDataFile,'utf8') || "{}" );
-	userData[userName] = userData[userName] || { userName: '', userEmail: '', progress: [] };
+	userData[userName] = userData[userName] || { userName: '', userEmail: '', paid: 0, progress: [] };
 	fn(userData[userName]);
 	fs.writeFileSync(config.userDataFile,JSON.stringify(userData,null,4));
 }
@@ -159,7 +247,7 @@ progress.post = function(req,res) {
 
 var stats = {};
 stats.get = function(req,res) {
-    function fix(s,len) { return (s+'                    ').substr(0,len); }
+	function fix(s,len) { return (s+'                    ').substr(0,len); }
 	var userData = userDataRead(true);
 	var head = [fix('USERNAME',16)];
 	var sum = [];
@@ -169,19 +257,20 @@ stats.get = function(req,res) {
 		var line = [fix(userName,16)];
 		var progress = userData[userName].progress;
 		for( var i=0 ; i<progress.length ; ++i ) {
-            var tries = progress[i] ? progress[i].tries || 0 : '';
-            if( tries ) {
-                count[i] = (count[i] || 0) + 1;
-                sum[i] = (sum[i] || 0) + tries;
-            }
+			var tries = progress[i] ? progress[i].tries || 0 : '';
+			if( tries ) {
+				count[i] = (count[i] || 0) + 1;
+				sum[i] = (sum[i] || 0) + tries;
+			}
 			line.push(tries);
 			head[i] = head[i] || i;
 		}
 		s += line.join('\t')+'\n';
 	}
 	var avg = [fix('AVG',16)];
-    for( var a=0 ; a<sum.length ; ++a ) {
-        avg[a+1] = (sum[a] || 0) / (count[a] || 0.0001);
+	for( var a=0 ; a<sum.length ; ++a ) {
+		var avgLong = (sum[a] || 0) / (count[a] || 0.0001);
+		avg[a+1] = Math.round(avgLong*10)/10;
 	}
 	s += avg.join('\t')+'\n';
 	s = '<pre>'+head.join('\t')+'\n'+s+'</pre>';
@@ -192,13 +281,13 @@ stats.get = function(req,res) {
 function login(req,res) {
 	var userName = req.body.userName;
 	var password = req.body.password;
-	console.log("Login", userName, password);
+	console.log("Login", userName);
 
 	var credentials = JSON.parse( fs.readFileSync(config.credentialsFile,'utf8') || "{}" );
 	if( credentials ) {
 		credentials['admin'] = config.adminPassword;
 	}
-	console.log(credentials);
+	//console.log(credentials);
 
 	var response = { result: 'failure' };
 	if( !credentials ) {
@@ -215,13 +304,14 @@ function login(req,res) {
 		var userData = userDataRead(userName);
 		req.session.userEmail = userData.userEmail || '';
 		req.session.userName = userData.userName || '';
+		req.session.paid = userData.paid || 0;
 		req.session.isAdmin = userData.isAdmin || 0;
 		req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
 		req.session.mayEdit = userData.mayEdit || userData.isAdmin || 0;
 		req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
 	}
 
-	console.log( response);
+	console.log(response.message);
 	res.send( JSON.stringify(response) );
 }
 
@@ -284,8 +374,21 @@ function logout(req,res) {
 function serverStart() {
 	config.port = config.port || 80;
 	config.sitePath = config.sitePath || '.';
-	var noAuthRequired = { '/login': 1, '/logout': 1, '/welcome.html': 1 };
-	console.log("\n\nServing "+config.sitePath+" on "+config.port);
+	var noAuthRequired = {
+		'/login': 1,
+		'/logout': 1,
+		'/welcome.html': 1,
+		'/signup.html': 1,
+		'/buy.html':1,
+		'/payment_create':1,
+		'/payment_execute':1,
+		'/payment_cancel':1
+	};
+	console.log("\n\n"+(new Date()).toISOString()+" Serving "+config.sitePath+" on "+config.port);
+	if( config.livePayments ) {
+		console.log( "ACCEPTING LIVE PAYMENTS");
+		console.log(config.paypal);
+	}
 
 	app.use(session({
 		store: new FileStore({ttl:60*60*24}),
@@ -312,14 +415,19 @@ function serverStart() {
 	app.use( function ensureAuthenticated( req, res, next ) {
 		var debug = false;
 		if( debug ) console.log('ensureAuthenticated');
-		var p = url.parse( req.url ).path;
+		var p = url.parse( req.url ).pathname;
+		if( debug ) console.log('page is ['+p+']');
 		if( noAuthRequired[p] ) {
 			if( debug ) console.log(p,'always allowed');
 			return next();
 		}
-		if( req.session.userName ) {
-			if( debug ) console.log(req.session.userName,'authorized');
+		if( req.session.userName && req.session.paid ) {
+			if( debug ) console.log(req.session.userName,'authorized and paid');
 			return next();
+		}
+		if( !req.session.paid ) {
+			if( debug ) console.log('unpaid. '+req.session.paid+' redirecting.');
+			return res.redirect('/buy.html');
 		}
 		if( debug ) console.log('unauthorized. redirecting.');
 		res.redirect('/welcome.html');
@@ -337,6 +445,9 @@ function serverStart() {
 	});
 
 	app.post( "/email", emailSubmit );
+	app.get( "/payment_create", payment.create );
+	app.get( "/payment_execute", payment.execute );
+	app.get( "/payment_cancel", payment.cancel );
 	app.post( "/login", login );
 	app.post( "/logout", logout );
 	app.post( "/signup", signup );
