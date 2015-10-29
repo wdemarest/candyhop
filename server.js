@@ -16,13 +16,22 @@ var config = JSON.parse( fs.readFileSync("config.json",'utf8') || "" );
 /*
 Sample config
 {
-	"port": 8090,
-	"sitePath": "site",
-	"adminPassword": "something",
-	"contactEmail": "will.demarest@gmail.com",
-	"mandrillApiKey": "",
-	"credentialsFile": "credentials.json",
-	"userDataFile": "userdata.json"
+        "port": 8090,
+        "portExternal": 8090,
+        "sitePath": "site",
+        "adminPassword": "??",
+        "contactEmail": "??",
+        "mandrillApiKey": "",
+        "credentialsFile": "credentials.json",
+        "userDataFile": "userdata.json",
+        "purchaseCode": "??",
+        "livePayments": false,
+        "paypal": {
+            "host" : "",  // leave blank
+            "port" : "",  // leave blank
+            "client_id" : " a value",
+            "client_secret" : "a value"
+        }
 }
 */
 
@@ -141,7 +150,7 @@ payment.execute = function(req,res) {
 		if (error) {
 			console.log("User "+userName+" failed to pay");
 			console.log(error);
-			res.redirect('/buy.html?pay=failure')
+			res.redirect('/buy.html?pay=failure '+error.message);
 		} else {
 			console.log("User "+userName+" paid");
 			var paymentFile = 'payments/'+(config.livePayments?'':'TEST_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
@@ -160,6 +169,35 @@ payment.execute = function(req,res) {
 payment.cancel = function(req,res) {
 	res.redirect("/welcome.html");
 }
+
+payment.useCode = function(req,res) {
+	var userName = req.session.userName;
+	var password = req.body.password;
+	//console.log(req.body);
+
+	var errorMessage = 
+		!userName ? "No user is logged in." :
+		password != config.purchaseCode ? "Invalid purchase code." :
+		null;
+
+	if( errorMessage ) {
+		console.log(errorMessage);
+		res.redirect('/buy.html?pay='+errorMessage)
+		return;
+	}
+
+	console.log("User "+userName+" used a purchase code");
+	var paymentFile = 'payments/'+(config.livePayments?'':'PCODE_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
+	console.log("Saving to "+paymentFile);
+	fs.writeFileSync(paymentFile, JSON.stringify({userName:userName, date:(new Date()).toISOString()},null,4));
+	var userData = userDataRead(userName);
+	userDataWrite(userName,function(userData) {
+		userData.paid = 1;
+		req.session.paid = userData.paid;
+		res.redirect('/buy.html?pay=success')
+	});
+}
+
 
 function emailSubmit(req, res) {
 	console.log("Emailing "+config.contactEmail);
@@ -382,7 +420,8 @@ function serverStart() {
 		'/buy.html':1,
 		'/payment_create':1,
 		'/payment_execute':1,
-		'/payment_cancel':1
+		'/payment_cancel':1,
+		'/payment_code':1
 	};
 	console.log("\n\n"+(new Date()).toISOString()+" Serving "+config.sitePath+" on "+config.port);
 	if( config.livePayments ) {
@@ -448,6 +487,7 @@ function serverStart() {
 	app.get( "/payment_create", payment.create );
 	app.get( "/payment_execute", payment.execute );
 	app.get( "/payment_cancel", payment.cancel );
+	app.post( "/payment_code", payment.useCode );
 	app.post( "/login", login );
 	app.post( "/logout", logout );
 	app.post( "/signup", signup );
