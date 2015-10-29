@@ -505,6 +505,14 @@ function serverStart() {
 
 	var siteServer = serveStatic(config.sitePath, {'index': ['index.html']});
 
+	app.get( "/welcome.html", function(req,res) {
+		if( req.session ) {
+			console.log('User '+req.session.userName+' logged out on welcome.');
+			req.session.destroy();
+		}
+		return siteServer(req,res);
+	});
+
 	app.get( "/editor.js", function(req,res) {
 		if( req.session && req.session.mayEdit ) {
 			return siteServer(req,res);

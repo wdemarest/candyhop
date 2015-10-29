@@ -40,6 +40,7 @@
 			$('#failMessage').html(paymentResult);
 			$('#buy-failure').modal('show');
 		}
+		$('.userName').text( readCookie('userName') );
 	})
 
 </script>
@@ -90,7 +91,12 @@
 	</div>
 	<div class="row">
 		<div class="col-md-6" style="margin:8px;">
-			Candy Hop is $5. Click the button to pay now and activate your account.
+			Welcome <span class="userName"></span>!
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" style="margin:8px;">
+			Candy Hop is $5. Please choose how to activate your account.
 		</div>
 	</div>
 	<div class="row">
