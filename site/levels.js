@@ -1,3 +1,25 @@
+var createEditor = function(){
+    var list = [];
+    
+    list.push({
+       	name: "Editor",
+        map: [
+            [1,2,0,0,0,0,0,0,0,0],
+            [3,3,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+    ]});
+    
+	
+    return list;
+};
+
 var createLevels = function(){
     var list = [];
         
@@ -566,6 +588,34 @@ var createLevels = function(){
 				"          "
 	])})
 	list.push({
+       	name: "Destructively Full House",
+        map: [
+            [1,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,7],
+            [0,7,7,7,7,7,7,7,7,2]
+    ]});
+    list.push({
+       	name: "Green In The House",
+        map: toLayout([
+			"Saaaaaaaaa",
+			" aaaaaaaaa",
+			" aaaaaaaaa",
+			" aaaaaaaaa",
+			" aaaggaaaa",
+			" aaaggaaaa",
+			" aaaaaaaaa",
+			" aaaaaaaaa",
+			" aaaaaaaaa",
+			" aaaaaaaaE"
+	])});
+	list.push({
        	name: "Close The Hole",
         map: toLayout([
 			"    .     ",
@@ -607,7 +657,6 @@ var createLevels = function(){
 			"          ",
 			"          "
 	])})
-
     list.push({
        	name: "Let Down The Ropes",
         map: toLayout([

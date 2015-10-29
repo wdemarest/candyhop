@@ -163,6 +163,9 @@
 	var editor;
 	var internet = new Internet();
 	var solver = window.Solver ? new Solver('.solver') : null;
+	var inEditor;
+	var currentLayoutList;
+	var seenEditorTutorial = false;
 
 
 	var tile = {
@@ -329,15 +332,38 @@
 		}
 		
 		var getLayout = this.getLayout = function() {
-			return layoutList[levelNumber].map;
+			return currentLayoutList[levelNumber].map;
+		}
+
+		function editorTutorial(){
+			if( seenEditorTutorial ) {
+				return;
+			}
+			$("#tutorial").show();
+			var pos = $("#game canvas").position()
+			$("#tutorial").css({top: (pos.top)+200, left: pos.left});
+			$("#tutorial").unbind("click");
+			$("#tutorial").click(function(){
+				$("#tutorial").hide();
+			});
+			
+			$("#tutorial").html(
+				"Step 1: Hit E to open or close the editor.<br />"+
+				"Step 2: hit the 1-7 keys to select candies.<br />"+
+				"Step 3: Click anywhere to place the selected candy<br />"+
+				"Step 4: Hit E to play it<br />"+
+				"Step 5: Click veiw and email us the layout<br />"+
+				"If you email us the layout we might put it in the real game!"
+			);
+			seenEditorTutorial = true;
 		}
 		
 		function tutorial(x, y){
-			if(levelNumber != 0){
+			if(levelNumber != 0 || inEditor){
 				return;
 			}
 		
-			if( $("#tutorial:hidden") ) {
+			if(tutLast === null) {
 				$("#tutorial").show();
 				var pos = $("#game canvas").position()
 				$("#tutorial").css({top: (pos.top)+200, left: pos.left});
@@ -378,7 +404,7 @@
 			player.draw();
 			$("#game .score").html(score+"/"+scoreMax);
 			$("#game .levelNumber").html("Level "+(levelNumber+1))
-			$("#game .levelName").html(layoutList[levelNumber].name)
+			$("#game .levelName").html(currentLayoutList[levelNumber].name)
 			tutorial(player.x, player.y);
 		}
 
@@ -396,7 +422,7 @@
 			screen = "levelSelect";
 			var drawLevelList = function(progressList){
 			    var html = "";
-    			for (i = 0; i < layoutList.length; i += 1){
+    			for (i = 0; i < currentLayoutList.length; i += 1){
     			    var progress = progressList[i];
     				if(i == 0) {
     				    progress = progress || { stars: 0 };
@@ -440,7 +466,7 @@
 		}
 
 		this.onLastLevel = function(){
-			return levelNumber >= layoutList.length - 1;
+			return levelNumber >= currentLayoutList.length - 1;
 		}
 
 		this.nextLevel = function(){
@@ -460,7 +486,7 @@
 
 			if( solver ) solver.reset();
 			levelNumber = newLevelNumber;
-			if (levelNumber<0 || levelNumber>=layoutList.length){
+			if (levelNumber<0 || levelNumber>=currentLayoutList.length){
 				alert("this level "+levelNumber+" does not exist");
 				return;
 			}
@@ -474,7 +500,7 @@
 			$("#levelSkip").hide();
 			$("#gameNextLevel").hide();
 			progressGet(function(progress){
-				if(progress[levelNumber] && progress[levelNumber].stars > 0 && levelNumber+1 < layoutList.length){
+				if(progress[levelNumber] && progress[levelNumber].stars > 0 && levelNumber+1 < currentLayoutList.length){
 					$("#gameNextLevel").show();
 					if(progress[levelNumber].tries % 3 == 0){
 						$("#levelSkip").show().html("You can skip to the next level any time.");
@@ -494,7 +520,10 @@
 			$(canvas).on("click", function(e) {
 				onClickCanvas(e);
 			});
-			editor = window.Editor ? new Editor() : null;
+			editor = window.Editor ? new Editor(currentLayoutList) : null;
+			if( inEditor ) {
+				editorTutorial();
+			}
 
 			Ticker.start("tick",0.05,tick);
 		}
@@ -625,7 +654,9 @@
 		//end
 		if (board.get(player.x,player.y) == tile.end.index){
 			level.scoreAdd(tile.end.points)
-			level.complete();
+			if(!inEditor){
+				level.complete();
+			};
 		}
 	}
 	
@@ -687,14 +718,18 @@
 		
 		return move(lastX,lastY);
 	}
+	
+	function editorStart(){
+		level.start(0);
+	}
 
 	var gameStart = function(forceLevel){
 		progressGet(function(progress){
 			var i = 0;
-			while(progress[i] && progress[i].stars > 0 && i < layoutList.length){
+			while(progress[i] && progress[i].stars > 0 && i < currentLayoutList.length){
 				i ++;
 			}
-			if(i >= layoutList.length){
+			if(i >= currentLayoutList.length){
 				i = 0;
 			}
 			if( forceLevel !== undefined && forceLevel !== null ) {
@@ -727,6 +762,11 @@
 	}
 
     var progressGet = function(callback) {
+    	if(inEditor){
+    		var emptyProgress = [];
+    		callback(emptyProgress);
+    		return;
+    	}
     	internet.ajax({
 			url: '/progress',
 			method: 'GET',
@@ -736,6 +776,13 @@
 	}
 	
 	var progressSave = function(levelNumber,pointsCollected,stars,callback) {
+		if(inEditor){
+    		var result = {
+    			result: "success"
+    		}
+    		callback(result);
+    		return;
+    	}
 		internet.ajax({
 			url: '/progress',
 			method: 'POST',
@@ -792,7 +839,7 @@
 		    //startFromTitleScreen = false;
 		}
 		
-		var startLevel; //layoutList.length - 1;
+		var startLevel; //currentLayoutList.length - 1;
 		var levelFound = window.location.hash.match( /#(\d+)/ );
 		if( levelFound && levelFound[1] !== undefined ) {
             var possibleStartLevel = parseInt(levelFound[1]) - 1;
@@ -809,7 +856,8 @@
 			gameStart(startLevel);
 		}
 	});
-	var layoutList = createLevels();
+	var gameLayoutList = createLevels();
+	var editorLayoutList = createEditor();
 	
 </script>
 
@@ -835,13 +883,18 @@
 				Welcome <span class='userName'></span>!
 			</div>
 			<div>
-				<button class="candyButton" onClick="javascript: gameStart(); $('#titleScreen').hide();">
+				<button class="candyButton" onClick="javascript: inEditor = false; currentLayoutList = gameLayoutList; gameStart(); $('#titleScreen').hide();">
 					<img src="image/iconPlay.png">
 				</button>
 			</div>
 			<div>
-				<button class="candyButton" onClick="javascript: level.select();">
+				<button class="candyButton" onClick="javascript: inEditor = false; currentLayoutList = gameLayoutList; level.select();">
 					<img src="image/iconLevelSelect.png">
+				</button>
+			</div>
+			<div>
+				<button class="candyButton" onClick="javascript: inEditor = true; currentLayoutList = editorLayoutList; seenEditorTutorial = false; editorStart(); $('#titleScreen').hide();">
+					Editor
 				</button>
 			</div>
 			<div id='stats' class='startHidden'>
@@ -855,7 +908,6 @@
 				</button>
 			</div>
 		</div>
-
 	</div>
 
 
@@ -965,6 +1017,11 @@
 				<div id="gameNextLevel">
 					<button class="candyButton centered" onClick="javascript: level.nextLevel();">
 						<img src="image/nextLevel.png">
+					</button>
+				</div>
+				<div class="toTitle">
+					<button onClick="javascript: $('#game').hide(); $('#titleScreen').show();">
+						Title Screen
 					</button>
 				</div>
 				<div id="levelSkip">
