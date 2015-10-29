@@ -160,8 +160,8 @@ payment.execute = function(req,res) {
 			userDataWrite(userName,function(userData) {
 				userData.paid = 1;
 				req.session.paid = userData.paid;
-				res.redirect('/buy.html?pay=success')
 			});
+			res.redirect('/buy.html?pay=success')
 		}
 	});
 }
@@ -194,8 +194,8 @@ payment.useCode = function(req,res) {
 	userDataWrite(userName,function(userData) {
 		userData.paid = 1;
 		req.session.paid = userData.paid;
-		res.redirect('/buy.html?pay=success')
 	});
+	res.redirect('/buy.html?pay=success')
 }
 
 
@@ -316,6 +316,17 @@ stats.get = function(req,res) {
 	return res.end( s );
 }
 
+function loginActivate(req,res,userName) {
+	var userData = userDataRead(userName);
+	req.session.userEmail = userData.userEmail || '';
+	req.session.userName = userData.userName || '';
+	req.session.isAdmin = userData.isAdmin || 0;
+	req.session.paid = userData.paid || userData.isAdmin || 0;
+	req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
+	req.session.mayEdit = userData.mayEdit || userData.isAdmin || 0;
+	req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
+}
+
 function login(req,res) {
 	var userName = req.body.userName;
 	var password = req.body.password;
@@ -331,6 +342,9 @@ function login(req,res) {
 	if( !credentials ) {
 		response.message = 'Unable to load credentials.';
 	} else
+	if( !userName ) {
+		response.message = 'No user name specified.';
+	} else
 	if( !credentials[userName] ) {
 		response.message = 'Unknown user name.';
 	} else
@@ -339,14 +353,7 @@ function login(req,res) {
 	} else {
 		response.result = 'success';
 		response.message = 'Successful login.';
-		var userData = userDataRead(userName);
-		req.session.userEmail = userData.userEmail || '';
-		req.session.userName = userData.userName || '';
-		req.session.paid = userData.paid || 0;
-		req.session.isAdmin = userData.isAdmin || 0;
-		req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
-		req.session.mayEdit = userData.mayEdit || userData.isAdmin || 0;
-		req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
+		loginActivate(req,res,userName);
 	}
 
 	console.log(response.message);
@@ -354,11 +361,6 @@ function login(req,res) {
 }
 
 function signup(req,res) {
-	// only allow signup when an admin is logged in
-	if( !req.session.isAdmin ) {
-		return res.send( { result: 'failure', message: 'Signup not allowed except when logged in as admin.' } );
-	}
-	
 	var userName = req.body.userName;
 	var userEmail = req.body.userEmail;
 	var password = req.body.password;
@@ -398,6 +400,8 @@ function signup(req,res) {
 		userData.userName = userName;
 		userData.userEmail = userEmail;
 	});
+	
+	loginActivate(req,res,userName);
 
 	return res.send( { result: 'success', message: 'Sign up complete!' } );
 }
@@ -415,8 +419,8 @@ function serverStart() {
 	var noAuthRequired = {
 		'/login': 1,
 		'/logout': 1,
+		'/signup': 1,
 		'/welcome.html': 1,
-		'/signup.html': 1,
 		'/buy.html':1,
 		'/payment_create':1,
 		'/payment_execute':1,

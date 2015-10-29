@@ -12,6 +12,58 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script>
+function signupSubmit() {
+	var self = this;
+
+	function enable(state) {
+		$(self).find('.form-control').prop('disabled', !state);
+		$(self).find('button[type="submit"]').prop('disabled', !state);
+		$(self).find('.fa-spin').toggleClass('hidden',state);
+	}
+
+	try {
+		enable(false);
+		var data = {}
+		var form = $(self).find('.form-control');
+		$.each(form,function(index,value) {
+			data[value.name] = $(value).val();
+		});
+
+		function failure(message) {
+			$('#signup-failure').modal('show');
+			$('#failMessage').text(message);
+			enable(true);
+		}
+
+		function success(response) {
+			var r = typeof response == 'string' ? JSON.parse(response) : response;
+			if( r.result == 'success' ) {
+				$(self).find('.fa-spin').toggleClass('hidden',false);
+				$('#signup-success').modal('show');
+				return;
+			}
+			failure(r.message);
+		}
+
+		$.ajax({
+			url: '/signup',
+			method: 'POST',
+			contentType:"application/json; charset=utf-8",
+			data: JSON.stringify(data),
+			success: success,
+			error: function(jqXHR, textStatus) {
+				failure(textStatus);
+			}
+		});
+
+	}
+	catch(e) {
+		debugger;
+	}
+	return false;
+}
+
+
 function loginSubmit() {
 	var self = this;
 
@@ -66,6 +118,110 @@ function loginSubmit() {
 </script>
 </head>
 <body>
+<div id="signup-dialog" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content modal-smaller">
+			<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Signup For CandyHop</h4>
+			</div>
+			<div class="modal-body">
+				<p>Fill out this form to sign up for Candy Hop.</p>
+				<form
+					class="form-horizontal"
+					onsubmit="return signupSubmit.apply(this,[]);"
+				>
+					<fieldset>
+					<!-- Text input-->
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+						<input name="userName" placeholder="User Name" class="form-control" type="text" required>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+							<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+							<input name="userEmail" placeholder="Email" class="form-control contact_email" type="text" required>
+							</div>
+						</div>
+						<span class="small text-muted"><i>We won't share your email with anyone, ever.</i></span>
+					</div>
+
+					<!-- Text input-->
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+						<input name="password" placeholder="Password" class="form-control" type="password" required>
+							</div>
+						</div>
+						<span class="small text-muted"><i>Must be at least 8 characters.</i></span>
+					</div>
+
+					<!-- Text input-->
+					<div class="form-group">
+						<div class="col-xs-8 inputGroupContainer">
+						<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+						<input name="confirmation" placeholder="Password Confirmation" class="form-control" type="password" required>
+							</div>
+						</div>
+					</div>
+
+					<!-- Button -->
+					<div class="form-group">
+						<label class="col-xs-4 control-label"></label>
+						<div class="col-xs-4">
+							<button type="submit" class="btn btn-info">
+							<span><i class="fa fa-refresh fa-spin hidden"></i></span>
+									Complete Signup Now
+							</button>
+						</div>
+					</div>
+
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="signup-success" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Thanks for signing up!</h4>
+			</div>
+			<div class="modal-body">
+				<p>You are nearly ready to play.</p>
+			</div>
+			<div class="modal-footer">
+				<a type="button" class="btn btn-primary" href="/buy.html">Continue</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="signup-failure" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Signup Failed</h4>
+			</div>
+			<div class="modal-body">
+				<p>Sorry, but your signup did not succeed.</p>
+				<p id='failMessage'></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Try Again</button>
+				<a type="button" class="btn btn-primary" href="/">Skip It</a>
+			</div>
+		</div>
+	</div>
+</div>
 <div id="login-dialog" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content modal-smaller">
@@ -163,9 +319,9 @@ function loginSubmit() {
 			<p>
 				Sign up to play Candy Hop!
 			</p>	
-			<a class="btn btn-info btn-md appsoma-blue-bg spacer" href="/signup.html">Sign Up</a>
+			<a class="btn btn-info btn-md appsoma-blue-bg spacer" data-toggle="modal" data-target="#signup-dialog">Signup For Candy Hop</a>
 			<p style='margin-top: 20px;'>
-			Login now to start playing!
+				Login now to start playing!
 			</p>
 			<a class="btn btn-info btn-md appsoma-blue-bg spacer" data-toggle="modal" data-target="#login-dialog">Login</a>
 		</div>

@@ -155,7 +155,7 @@
 	var context;
 	var imageBank;
 	var soundBank;
-	var candySize = 70;
+	var candySize = 66;
 	var player;
 	var screen = "game";
 	var level;
@@ -296,11 +296,11 @@
 		        return;
 		    }
 
-			context.clearRect(x * 76,y * 76,candySize,candySize);
-			context.drawImage(tile.image,x * 76,y * 76,candySize,candySize);
+			context.clearRect(x * 70,y * 70,candySize,candySize);
+			context.drawImage(tile.image,x * 70,y * 70,candySize,candySize);
 			tileLast[y*10+x] = tile.index;
 			if( overImage ) {
-				context.drawImage(overImage,x * 76,y * 76,candySize,candySize)
+				context.drawImage(overImage,x * 70,y * 70,candySize,candySize)
 			}
 			
 		}
@@ -322,6 +322,7 @@
 		var levelNumber;
 		var score = 0;
 		var scoreMax = undefined;
+		var tutLast = null;
 
 		this.scoreAdd = function(amount){
 			score += amount;
@@ -342,23 +343,28 @@
 				$("#tutorial").css({top: (pos.top)+200, left: pos.left});
 			}
 			
+			var tut = '';
 			if(x == 0 && y == 0){
-				$("#tutorial").html("Use the arrow keys to move.<br />"+
+				tut = "Use the arrow keys to move.<br />"+
 				"<img src='image/arrowKeys.png'><br />"+
-				"Hit the down arrow.")
+				"Hit the down arrow.";
 			}
 			if((x == 0 && y == 1) || (x == 1 && y == 1)){
-				$("#tutorial").html("Hit the right arrow.")
+				tut = "Hit the right arrow."
 			}
 			
 			if(x == 2 && y == 1){
-				$("#tutorial").html("Hit the up arrow.")
+				tut = "Hit the up arrow.";
 			}
 			if(x == 2 && y == 0){
-				$("#tutorial").html("Get to the end flag with as many points as you can!")
+				tut = "Get to the end flag with as many points as you can!";
 			}
 			if(x == 4 && y == 0){
-				$("#tutorial").html("Cotton candies give you more points!")
+				tut = "Cotton candies give you more points!";
+			}
+			if( tut !== tutLast ) {
+				$("#tutorial").html(tut);
+				tutLast = tut;
 			}
 		}
 		
@@ -462,6 +468,7 @@
 			board.findStart();
 			score = 0;
 			scoreMax = board.findMax();
+			tutLast = null;
 			player = new Player(board.startX, board.startY);
 			$("#tutorial").hide();
 			$("#levelSkip").hide();
@@ -627,7 +634,7 @@
 		if (screen != "game" || (editor && editor.isActive()) ){
 			return;
 		}
-        var cell = getCursorPosition(canvas,e,76,76,76*10,76*10);
+        var cell = getCursorPosition(canvas,e,70,70,70*10,70*10);
         var lastX = player.x;
         var lastY = player.y;
         player.x = cell.x;
@@ -776,7 +783,6 @@
 		level = new Level();
 
         if( readCookie('isAdmin') == "1" ) {
-            $('#signup').show();
             $('#stats').show();
         }
 
@@ -836,11 +842,6 @@
 			<div>
 				<button class="candyButton" onClick="javascript: level.select();">
 					<img src="image/iconLevelSelect.png">
-				</button>
-			</div>
-			<div id='signup' class='startHidden'>
-				<button onClick="javascript: window.location = '/signup.html';">
-					Admin: Signup Users
 				</button>
 			</div>
 			<div id='stats' class='startHidden'>
@@ -925,11 +926,11 @@
 
 	<div id="game" class="startHidden layer">
 		<div class='centered' style='width:970px;'>
-			<div class="gamePanel" style='width:760px;'>
-				<div style="width:760px; height: 760px; position: absolute; z-index:-1; top: 0px; background-color: white; opacity: 0.2">
+			<div class="gamePanel" style='width:700px;'>
+				<div style="width:700px; height: 700px; position: absolute; z-index:-1; top: 0px; background-color: white; opacity: 0.2">
 				</div>
-				<div style="width:760px; height: 760px;">
-					<canvas id="boardCanvas" width="760px" height="760px">
+				<div style="width:700px; height: 700px;">
+					<canvas id="boardCanvas" width="700px" height="700px">
 					</canvas>
 				</div>
 			</div>
