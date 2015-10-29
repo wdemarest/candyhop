@@ -379,21 +379,6 @@ var createLevels = function(){
 			"E  .   .. ",
 			"   .   .. "
 	])});
-        //very hard
-    list.push({
-       	name: "Twice Around",
-        map: [
-            [0,3,3,3,3,3,0,0,0,0],
-            [0,6,3,3,3,4,4,3,0,0],
-            [0,3,3,0,0,0,3,3,0,0],
-            [1,4,3,3,0,0,3,3,0,0],
-            [0,3,6,3,6,0,3,3,0,0],
-            [0,3,3,3,3,0,0,0,0,0],
-            [0,0,0,0,2,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0]
-    ]});
         // medium
     list.push({
        	name: "There And Back",
@@ -496,6 +481,120 @@ var createLevels = function(){
 			"          ",
 			"          "
 	])})
+	list.push({
+       	name: "Fuller Fuller House",
+        map: toLayout([
+			"Sbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"bbbbbbbbbb",
+			"Ebbbbbbbbb"
+	])})
+	list.push({
+	       	name: "Circle",
+	        map: toLayout([
+				"..      ..",
+				".gb    bg.",
+				" b      b ",
+				"          ",
+				"   E      ",
+				"          ",
+				"          ",
+				" b.b    b ",
+				" Sgg.  bg.",
+				"        .."
+	])})
+	list.push({
+	       	name: "Intro To Antibridges",
+	        map: toLayout([
+				"      E   ",
+				"      .   ",
+				"      .   ",
+				"      .   ",
+				"S.....a...",
+				"          ",
+				"          ",
+				"          ",
+				"          ",
+				"          "
+	])})
+	list.push({
+	       	name: "Direction",
+	        map: toLayout([
+				"          ",
+				"          ",
+				"   gg     ",
+				"  Sga....E",
+				"   .g.    ",
+				"    .     ",
+				"    .     ",
+				"    .     ",
+				"    .     ",
+				"          "
+	])})
+	list.push({
+	       	name: "Direction",
+	        map: toLayout([
+				"     E    ",
+				"  Sgagggg ",
+				"   .    . ",
+				"   .    . ",
+				"   .    . ",
+				"   ...... ",
+				"          ",
+				"          ",
+				"          ",
+				"          "
+	])})
+	list.push({
+	       	name: "Close The Hole",
+	        map: toLayout([
+				"    .     ",
+				"    .   E ",
+				"    .   . ",
+				"  gb   ag ",
+				"  g .   . ",
+				"  g .   . ",
+				"  g a   . ",
+				"  ggg.... ",
+				"   .      ",
+				"   S      "
+	])})
+	list.push({
+	       	name: "Sneaky Gap",
+	        map: toLayout([
+				"   S      ",
+				"   g..    ",
+				"  .g b    ",
+				"  ggg     ",
+				"  g a     ",
+				"  ga.....E",
+				"          ",
+				"          ",
+				"          ",
+				"          "
+	])})
+	        //very hard
+    list.push({
+       	name: "Twice Around",
+        map: [
+            [0,3,3,3,3,3,0,0,0,0],
+            [0,6,3,3,3,4,4,3,0,0],
+            [0,3,3,0,0,0,3,3,0,0],
+            [1,4,3,3,0,0,3,3,0,0],
+            [0,3,6,3,6,0,3,3,0,0],
+            [0,3,3,3,3,0,0,0,0,0],
+            [0,0,0,0,2,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+    ]});
+
     list.push({
        	name: "Let Down The Ropes",
         map: toLayout([
@@ -540,104 +639,6 @@ var createLevels = function(){
             "..b ..E   ",
             "    ..  b "
     ])});
-	list.push({
-       	name: "Fuller Fuller House",
-        map: toLayout([
-			"Sbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"bbbbbbbbbb",
-			"Ebbbbbbbbb"
-])})
-list.push({
-       	name: "Circle",
-        map: toLayout([
-			"..      ..",
-			".gb    bg.",
-			" b      b ",
-			"          ",
-			"   E      ",
-			"          ",
-			"          ",
-			" b.b    b ",
-			" Sgg.  bg.",
-			"        .."
-])})
-list.push({
-       	name: "Intro To Antibridges",
-        map: toLayout([
-			"      E   ",
-			"      .   ",
-			"      .   ",
-			"      .   ",
-			"S.....a...",
-			"          ",
-			"          ",
-			"          ",
-			"          ",
-			"          "
-])})
-list.push({
-       	name: "Direction",
-        map: toLayout([
-			"          ",
-			"          ",
-			"   gg     ",
-			"  Sga....E",
-			"   .g.    ",
-			"    .     ",
-			"    .     ",
-			"    .     ",
-			"    .     ",
-			"          "
-])})
-list.push({
-       	name: "Direction",
-        map: toLayout([
-			"     E    ",
-			"  Sgagggg ",
-			"   .    . ",
-			"   .    . ",
-			"   .    . ",
-			"   ...... ",
-			"          ",
-			"          ",
-			"          ",
-			"          "
-])})
-list.push({
-       	name: "Close The Hole",
-        map: toLayout([
-			"    .     ",
-			"    .   E ",
-			"    .   . ",
-			"  gb   ag ",
-			"  g .   . ",
-			"  g .   . ",
-			"  g a   . ",
-			"  ggg.... ",
-			"   .      ",
-			"   S      "
-])})
-list.push({
-       	name: "Sneaky Gap",
-        map: toLayout([
-			"   S      ",
-			"   g..    ",
-			"  .g b    ",
-			"  ggg     ",
-			"  g a     ",
-			"  ga.....E",
-			"          ",
-			"          ",
-			"          ",
-			"          "
-])})
 
         return list;
     };
