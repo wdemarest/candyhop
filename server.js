@@ -427,6 +427,7 @@ account.signup = function(req,res) {
 		"Welcome to Candy Hop!",
 		"Thanks for signing up for Candy Hop.\n"+
 		"\n"+
+		"http://playcandyhop.com\n"+
 		"User Name: "+userName+"\n"+
 		"Password:  "+password+"\n"+
 		"\n"+
