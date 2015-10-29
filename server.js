@@ -538,7 +538,7 @@ function serverStart() {
 			if( debug ) console.log(req.session.userName,'authorized and paid');
 			return next();
 		}
-		if( !req.session.paid ) {
+		if( !req.session.paid && req.session.userName ) {
 			if( debug ) console.log('unpaid. '+req.session.paid+' redirecting.');
 			return res.redirect('/buy.html');
 		}
