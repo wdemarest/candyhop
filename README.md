@@ -45,6 +45,12 @@ From local osx terminal:
 
 7. Edit the ./ssh/known_hosts file and paste appropriate public keys
 
+8. Get a Mandrill account
+   - verify the email address
+   - add a DKIM record
+- setup postfix on the server:
+   http://www.techknowjoe.com/article/create-your-own-email-forwarding-server
+
 # Running the Server
 
 While logged in to the koding.com server, or any machine that has its public key on

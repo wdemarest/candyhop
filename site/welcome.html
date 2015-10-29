@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CandyHop</title>
+<title>Candy Hop</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
@@ -115,6 +115,30 @@ function loginSubmit() {
 	return false;
 }
 
+function forgot(userName) {
+	if( !userName ) {
+		return alert( "Please enter your username." );
+	}
+	
+	$.ajax({
+		url: '/forgot',
+		method: 'POST',
+		contentType:"application/json; charset=utf-8",
+		data: JSON.stringify({userName:userName}),
+		success: function(result) {
+			if( result.status == 'success' ) {
+				alert( "We just sent an email with your login information. It might take a while to arrive, and don't forget to check your spam folder!");
+			}
+			else {
+				alert( "Error: The Candy Hop server said '"+JSON.stringify(result) );
+			}
+		},
+		error: function(jqXHR, textStatus) {
+			alert( "Unable to send email.\n"+textStatus);
+		}
+	});
+}
+
 </script>
 </head>
 <body>
@@ -123,7 +147,7 @@ function loginSubmit() {
 		<div class="modal-content modal-smaller">
 			<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title">Signup For CandyHop</h4>
+				<h4 class="modal-title">Signup For Candy Hop</h4>
 			</div>
 			<div class="modal-body">
 				<p>Fill out this form to sign up for Candy Hop.</p>
@@ -227,10 +251,10 @@ function loginSubmit() {
 		<div class="modal-content modal-smaller">
 			<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title">Login To CandyHop</h4>
+				<h4 class="modal-title">Login To Candy Hop</h4>
 			</div>
 			<div class="modal-body">
-				<p>Please enter your CandyHop login information.</p>
+				<p>Please enter your Candy Hop login information.</p>
 				<form
 					class="form-horizontal"
 					onsubmit="return loginSubmit.apply(this,[]);"
@@ -240,7 +264,7 @@ function loginSubmit() {
 						<div class="col-xs-8 inputGroupContainer">
 						<div class="input-group">
 							<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-							<input name="userName" placeholder="Your user name" class="form-control" type="text" required>
+							<input id='loginUserName' name="userName" placeholder="Your user name" class="form-control" type="text" required>
 							</div>
 						</div>
 					</div>
@@ -248,10 +272,11 @@ function loginSubmit() {
 					<!-- Text input-->
 					<div class="form-group">
 						<div class="col-xs-8 inputGroupContainer">
-						<div class="input-group">
-						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input name="password" placeholder="Your Password" class="form-control" type="password" required>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+								<input name="password" placeholder="Your Password" class="form-control" type="password" required style="display:inline;">
 							</div>
+							<a href="javascript: forgot($('#loginUserName').val());" style="display:inline;">Forgot password?</a>
 						</div>
 					</div>
 
@@ -311,7 +336,7 @@ function loginSubmit() {
 	</div>
 	<div class="row">
 		<div class="col-md-12">
-			<p class="lead">Welcome to CandyHop!</p>
+			<p class="lead">Welcome to Candy Hop!</p>
 		</div>
 	</div>
 	<div class="row">

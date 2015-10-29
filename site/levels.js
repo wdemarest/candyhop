@@ -509,6 +509,20 @@ var createLevels = function(){
 				" Sgg.  bg.",
 				"        .."
 	])})
+    list.push({
+       	name: "Twice Around",
+        map: [
+            [0,3,3,3,3,3,0,0,0,0],
+            [0,6,3,3,3,4,4,3,0,0],
+            [0,3,3,0,0,0,3,3,0,0],
+            [1,4,3,3,0,0,3,3,0,0],
+            [0,3,6,3,6,0,3,3,0,0],
+            [0,3,3,3,3,0,0,0,0,0],
+            [0,0,0,0,2,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+    ]});
 	list.push({
 	       	name: "Intro To Antibridges",
 	        map: toLayout([
@@ -538,7 +552,7 @@ var createLevels = function(){
 				"          "
 	])})
 	list.push({
-	       	name: "Direction",
+	       	name: "Green To Red",
 	        map: toLayout([
 				"     E    ",
 				"  Sgagggg ",
@@ -552,48 +566,47 @@ var createLevels = function(){
 				"          "
 	])})
 	list.push({
-	       	name: "Close The Hole",
-	        map: toLayout([
-				"    .     ",
-				"    .   E ",
-				"    .   . ",
-				"  gb   ag ",
-				"  g .   . ",
-				"  g .   . ",
-				"  g a   . ",
-				"  ggg.... ",
-				"   .      ",
-				"   S      "
+       	name: "Close The Hole",
+        map: toLayout([
+			"    .     ",
+			"    .   E ",
+			"    .   . ",
+			"  gb   ag ",
+			"  g .   . ",
+			"  g .   . ",
+			"  g a   . ",
+			"  ggg.... ",
+			"   .      ",
+			"   S      "
 	])})
 	list.push({
-	       	name: "Sneaky Gap",
-	        map: toLayout([
-				"   S      ",
-				"   g..    ",
-				"  .g b    ",
-				"  ggg     ",
-				"  g a     ",
-				"  ga.....E",
-				"          ",
-				"          ",
-				"          ",
-				"          "
+       	name: "Sneaky Gap",
+        map: toLayout([
+			"   S      ",
+			"   g..    ",
+			"  .g b    ",
+			"  ggg     ",
+			"  g a     ",
+			"  ga.....E",
+			"          ",
+			"          ",
+			"          ",
+			"          "
 	])})
-	        //very hard
-    list.push({
-       	name: "Twice Around",
-        map: [
-            [0,3,3,3,3,3,0,0,0,0],
-            [0,6,3,3,3,4,4,3,0,0],
-            [0,3,3,0,0,0,3,3,0,0],
-            [1,4,3,3,0,0,3,3,0,0],
-            [0,3,6,3,6,0,3,3,0,0],
-            [0,3,3,3,3,0,0,0,0,0],
-            [0,0,0,0,2,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0]
-    ]});
+	list.push({
+       	name: "For Thought",
+        map: toLayout([
+			"  S       ",
+			"E ga..... ",
+			"  .    b. ",
+			"  .     . ",
+			"  .     . ",
+			"  ....... ",
+			"          ",
+			"          ",
+			"          ",
+			"          "
+	])})
 
     list.push({
        	name: "Let Down The Ropes",

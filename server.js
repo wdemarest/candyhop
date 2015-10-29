@@ -115,7 +115,7 @@ payment.create = function(req,res) {
 				"total": "5.00",
 				"currency": "USD"
 			},
-		"description": "Purchase CandyHop"
+		"description": "Purchase Candy Hop"
 		}]
 	};
 	
@@ -198,32 +198,44 @@ payment.useCode = function(req,res) {
 	res.redirect('/buy.html?pay=success')
 }
 
+var emailer = {};
 
-function emailSubmit(req, res) {
-	console.log("Emailing "+config.contactEmail);
-
+emailer.send = function(to,subject,body,callback) {
 	var email = require('mandrill-send')(config.mandrillApiKey);
+	console.log("Emailing "+to+" "+subject);
 	email({
-		from: 'Candy Hop Contact Form <'+config.contactEmail+'>',
-		to: [ config.contactEmail ],
-		subject: req.body.subject,
-		text: "From: "+req.body.name+"\nEmail: "+req.body.email+"\n"+req.body.message
-	},
-	function(err) {
-		var response = {
-			status: "Sent"
-		};
-		if( err ) {
-			var msg = (err.data ? (err.data.message || err.data) : err);
-			response = {
-				error: JSON.stringify(msg)
+			from: 'Candy Hop <'+config.contactEmail+'>',
+			to: [ to, config.contactEmail ],
+			subject: subject,
+			text: body
+		},
+		function(err) {
+			var result = {
+				status: "success",
+				when: (new Date()).toISOString()
 			};
-		}
-		console.log( response);
-		res.send( JSON.stringify(response) );
-	});
+			if( err ) {
+				var msg = (err.data ? (err.data.message || err.data) : err);
+				result = {
+					status: 'failure', error: JSON.stringify(msg)
+				};
+			}
+			console.log(result);
+			callback(result);
+		}	
+	);
+};
 
-}
+emailer.submit = function(req, res) {
+	emailer.send(
+		[ config.contactEmail ],
+		req.body.subject,
+		"From: "+req.body.name+"\nEmail: "+req.body.email+"\n"+req.body.message,
+		function(result) {
+			res.send( JSON.stringify(response) );
+		}
+	);
+};
 
 function userDataRead(userName) {
 	var userData = JSON.parse( fs.readFileSync(config.userDataFile,'utf8') || "{}" );
@@ -283,8 +295,8 @@ progress.post = function(req,res) {
 	return res.send( { result: 'success' } );
 }
 
-var stats = {};
-stats.get = function(req,res) {
+var ops = {};
+ops.get_stats = function(req,res) {
 	function fix(s,len) { return (s+'                    ').substr(0,len); }
 	var userData = userDataRead(true);
 	var head = [fix('USERNAME',16)];
@@ -316,6 +328,14 @@ stats.get = function(req,res) {
 	return res.end( s );
 }
 
+ops.get_user = function(req,res) {
+	var userName = req.params.u || req.params.userName || req.params.user || true;
+	var userData = userDataRead(userName);
+	delete userData.progress;
+	var s = '<pre>'+JSON.stringify(userData,null,4)+'</pre>';
+	res.send( s );
+}
+
 function loginActivate(req,res,userName) {
 	var userData = userDataRead(userName);
 	req.session.userEmail = userData.userEmail || '';
@@ -327,7 +347,9 @@ function loginActivate(req,res,userName) {
 	req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
 }
 
-function login(req,res) {
+var account = {};
+
+account.login = function(req,res) {
 	var userName = req.body.userName;
 	var password = req.body.password;
 	console.log("Login", userName);
@@ -360,7 +382,7 @@ function login(req,res) {
 	res.send( JSON.stringify(response) );
 }
 
-function signup(req,res) {
+account.signup = function(req,res) {
 	var userName = req.body.userName;
 	var userEmail = req.body.userEmail;
 	var password = req.body.password;
@@ -400,26 +422,73 @@ function signup(req,res) {
 		userData.userName = userName;
 		userData.userEmail = userEmail;
 	});
+	emailer.send(
+		userEmail,
+		"Welcome to Candy Hop!",
+		"Thanks for signing up for Candy Hop.\n"+
+		"\n"+
+		"User Name: "+userName+"\n"+
+		"Password:  "+password+"\n"+
+		"\n"+
+		"If you ever have any questions or issues with Candy Hop, please don't hesitate to email me at "+config.contactEmail+"\n"+
+		"\n"+
+		"Happy Hopping!\n",
+		function(result) {
+			userDataWrite(userName,function(userData) {
+				userData.signupEmail = result;
+			});
+		}
+	);
 	
 	loginActivate(req,res,userName);
 
 	return res.send( { result: 'success', message: 'Sign up complete!' } );
 }
 
-
-function logout(req,res) {
+account.logout = function(req,res) {
 	console.log('logout');
 	req.session.destroy();
 	res.send( { result: 'success' } );
+}
+
+account.forgot = function(req,res) {
+	console.log(req.body);
+	var userName = req.body.userName;
+	console.log( userName+' forgot pwd');
+	var credentials = JSON.parse( fs.readFileSync(config.credentialsFile,'utf8') || "{}" );
+	if( !credentials[userName] ) {
+		return res.send( { result: 'failure', message: 'No such user.' } );
+	}
+	var userEmail = userDataRead(userName).userEmail;
+	var password = credentials[userName];
+	emailer.send(
+		userEmail,
+		"Candy Hop login info for "+userName,
+		"As you requested, here is your Candy Hop login information.\n"+
+		"\n"+
+		"User Name: "+userName+"\n"+
+		"Password:  "+password+"\n"+
+		"\n"+
+		"If you ever have any other questions or issues with Candy Hop, please don't hesitate to email me at "+config.contactEmail+"\n"+
+		"\n"+
+		"Happy Hopping!\n",
+		function(result) {
+			userDataWrite(userName,function(userData) {
+				userData.reminderEmail = result;
+			});
+			res.send( result );
+		}
+	);
 }
 
 function serverStart() {
 	config.port = config.port || 80;
 	config.sitePath = config.sitePath || '.';
 	var noAuthRequired = {
+		'/signup': 1,
 		'/login': 1,
 		'/logout': 1,
-		'/signup': 1,
+		'/forgot': 1,
 		'/welcome.html': 1,
 		'/buy.html':1,
 		'/payment_create':1,
@@ -487,17 +556,19 @@ function serverStart() {
 		return next();
 	});
 
-	app.post( "/email", emailSubmit );
+	app.post( "/email", emailer.submit );
 	app.get( "/payment_create", payment.create );
 	app.get( "/payment_execute", payment.execute );
 	app.get( "/payment_cancel", payment.cancel );
 	app.post( "/payment_code", payment.useCode );
-	app.post( "/login", login );
-	app.post( "/logout", logout );
-	app.post( "/signup", signup );
+	app.post( "/signup", account.signup );
+	app.post( "/login", account.login );
+	app.post( "/logout", account.logout );
+	app.post( "/forgot", account.forgot );
 	app.get( "/progress", progress.get );
 	app.post( "/progress", progress.post );
-	app.get( "/stats", stats.get );
+	app.get( "/stats", ops.get_stats );
+	app.get( "/user", ops.get_user );
 
 	app.get( "/after_payment", function(req,res,next) {
 		res.send( "Payment Complete" );
