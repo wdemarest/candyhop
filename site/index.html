@@ -165,7 +165,10 @@
 	var solver = window.Solver ? new Solver('.solver') : null;
 	var inEditor;
 	var currentLayoutList;
+	var gameLayoutList;
+	var editorLayoutList;
 	var seenEditorTutorial = false;
+	
 
 
 	var tile = {
@@ -577,7 +580,43 @@
 		    scoreMax += amount;
 		 	
 		}
+
+		this.save = function() {
+			if( !inEditor ) { return; }
+			var layout = currentLayoutList[levelNumber];
+			layout.name = layout.name || "No Name";
+			layout.author = readCookie('userName');
+
+			$('#saveStatus').text('Saving...');
+			
+			internet.ajax({
+				url: '/pack',
+				method: 'POST',
+				contentType:"application/json; charset=utf-8",
+				data: JSON.stringify({
+				    level: levelNumber,
+				    layout: layout
+				})
+			}, function(data) {
+				debugger;
+				$('#saveStatus').text(data.result == 'failure' ? data.message+' '+data.details : 'saved');
+				setTimeout(function() {
+					$('#saveStatus').text('');
+				}, data.result == 'success' ? 2*1000 : 60*1000);
+			});
+
+		}
 	}
+
+	function loadPack(userName,callback) {
+    	internet.ajax({
+			url: '/pack',
+			method: 'GET',
+			contentType:"application/json; charset=utf-8",
+			data: { userName: userName },
+		}, callback );
+	}
+
 
 	var Player = function(startX, startY){
 		var lastX = 0;
@@ -822,6 +861,17 @@
 		soundBank.load("levelComplete2","sound/success1.mp3");
 		soundBank.load("levelComplete3","sound/successbig.mp3");
 		
+		gameLayoutList = createLevels();
+		$('#titleScreenEditor').hide();
+		loadPack( readCookie('userName'), function(pack) {
+			for( var i=0 ; i<20 ; ++i ) {
+				if( i>=pack.length || !pack[i] || !pack[i].map ) {
+					pack[i] = createBlank();
+				}
+			}
+			editorLayoutList = pack;
+			$('#titleScreenEditor').show();
+		});
 
 		$("button").click(function(){
 			soundBank.play("buttonHit");
@@ -856,9 +906,7 @@
 			gameStart(startLevel);
 		}
 	});
-	var gameLayoutList = createLevels();
-	var editorLayoutList = createEditor();
-	
+
 </script>
 
 </head>
@@ -893,7 +941,7 @@
 				</button>
 			</div>
 			<div>
-				<button class="candyButton" onClick="javascript: inEditor = true; currentLayoutList = editorLayoutList; seenEditorTutorial = false; editorStart(); $('#titleScreen').hide();">
+				<button id="titleScreenEditor" class="candyButton" onClick="javascript: inEditor = true; currentLayoutList = editorLayoutList; seenEditorTutorial = false; editorStart(); $('#titleScreen').hide();">
 					Editor
 				</button>
 			</div>
@@ -999,9 +1047,13 @@
 					<div>LAYOUT EDITOR</div>
 					<img src='image/blank.png'>
 					Tiles are 1-7
-					<button onClick="javascript: return editor ? editor.showLevelCode() : null;">
+					<!-- button onClick="javascript: return editor ? editor.showLevelCode() : null;">
 						VIEW
+					</button -->
+					<button onClick="javascript: level.save();">
+						SAVE
 					</button>
+					<span id='saveStatus'></span>
 					<pre class='editor-layout startHidden'></pre>
 				</div>
 				<div>

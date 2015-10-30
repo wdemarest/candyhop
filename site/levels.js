@@ -1,8 +1,6 @@
-var createEditor = function(){
-    var list = [];
-    
-    list.push({
-       	name: "Editor",
+var createBlank = function(){
+    return {
+		name: "Editor",
         map: [
             [1,2,0,0,0,0,0,0,0,0],
             [3,3,0,0,0,0,0,0,0,0],
@@ -14,10 +12,7 @@ var createEditor = function(){
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0]
-    ]});
-    
-	
-    return list;
+    ]};
 };
 
 var createLevels = function(){

@@ -53,6 +53,13 @@ if( !fs.existsSync('./payments') ) {
 	});
 }
 
+if( !fs.existsSync('./pack') ) {
+	console.log("Creating /pack directory.");
+	mkdirp('./pack', function(err) {
+		if( err ) console.log(err);
+	});
+}
+
 if( !fs.existsSync(config.credentialsFile) ) {
 	console.log("Creating", config.credentialsFile);
 	console.log("Filling with user 'admin'");
@@ -294,6 +301,61 @@ progress.post = function(req,res) {
 	});
 	return res.send( { result: 'success' } );
 }
+
+var levelPack = new (function() {
+
+	function makePath(userName) {
+		return "pack/"+userName+".json";
+	}
+
+	function read(userName) {
+		if( !fs.existsSync(makePath(userName)) ) {
+			return [];
+		}
+
+		return JSON.parse( fs.readFileSync(makePath(userName),'utf8') || "[]" );
+	}
+
+	function write(userName,pack) {
+		fs.writeFileSync(makePath(userName),JSON.stringify(pack));
+	}
+
+	this.get = function(req,res) {
+		var userName = req.session.userName;
+		res.send( read(userName) );
+	}
+	
+	this.post = function(req,res) {
+		var userName = req.session.userName;
+		var level = req.body.level;
+		var layout = req.body.layout;
+		
+		if( !userName ) {
+			return res.send( { result: 'failure', message: 'blank user name', detail: req.body } );
+		}
+		
+		if( level === undefined || level === null ) {
+			return res.send( { result: 'failure', message: 'no level specified', detail: req.body } );
+		}
+
+		if( !layout || !layout.name || !layout.map ) {
+			return res.send( { result: 'failure', message: 'bad layout format', detail: req.body } );
+		}
+		
+	
+		var newLayout = {
+			name: layout.name,
+			author: layout.author || '',
+			map: layout.map || []
+		};
+
+		var pack = read(userName);
+		pack[level] = newLayout;
+		write(userName,pack);
+		return res.send( { result: 'success' } );
+	}
+	return this;
+})();
 
 var ops = {};
 ops.get_stats = function(req,res) {
@@ -568,6 +630,8 @@ function serverStart() {
 	app.post( "/forgot", account.forgot );
 	app.get( "/progress", progress.get );
 	app.post( "/progress", progress.post );
+	app.get( "/pack", levelPack.get );
+	app.post( "/pack", levelPack.post );
 	app.get( "/stats", ops.get_stats );
 	app.get( "/user", ops.get_user );
 
