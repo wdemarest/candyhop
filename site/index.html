@@ -85,7 +85,7 @@
 		z-index:100;
 	}
 	.dialogBox {
-		width: 700px;
+		width: 620px;
 		margin: auto;
 		margin-top: 50px;
 		text-align: center;
@@ -155,7 +155,7 @@
 	var context;
 	var imageBank;
 	var soundBank;
-	var candySize = 66;
+	var candySize = 58;
 	var player;
 	var screen = "game";
 	var level;
@@ -302,11 +302,11 @@
 		        return;
 		    }
 
-			context.clearRect(x * 70,y * 70,candySize,candySize);
-			context.drawImage(tile.image,x * 70,y * 70,candySize,candySize);
+			context.clearRect(x * 62,y * 62,candySize,candySize);
+			context.drawImage(tile.image,x * 62,y * 62,candySize,candySize);
 			tileLast[y*10+x] = tile.index;
 			if( overImage ) {
-				context.drawImage(overImage,x * 70,y * 70,candySize,candySize)
+				context.drawImage(overImage,x * 62,y * 62,candySize,candySize)
 			}
 			
 		}
@@ -704,7 +704,7 @@
 		if (screen != "game" || (editor && editor.isActive()) ){
 			return;
 		}
-        var cell = getCursorPosition(canvas,e,70,70,70*10,70*10);
+        var cell = getCursorPosition(canvas,e,62,62,62*10,62*10);
         var lastX = player.x;
         var lastY = player.y;
         player.x = cell.x;
@@ -1025,12 +1025,12 @@
 	</div>
 
 	<div id="game" class="startHidden layer">
-		<div class='centered' style='width:970px;'>
-			<div class="gamePanel" style='width:700px;'>
-				<div style="width:700px; height: 700px; position: absolute; z-index:-1; top: 0px; background-color: white; opacity: 0.2">
+		<div class='centered' style='width:830px;'>
+			<div class="gamePanel" style='width:620px;'>
+				<div style="width:620px; height: 620px; position: absolute; z-index:-1; top: 0px; background-color: white; opacity: 0.2">
 				</div>
-				<div style="width:700px; height: 700px;">
-					<canvas id="boardCanvas" width="700px" height="700px">
+				<div style="width:620px; height: 620px;">
+					<canvas id="boardCanvas" width="620px" height="620px">
 					</canvas>
 				</div>
 			</div>
@@ -1046,11 +1046,10 @@
 				<div class="editor centered startHidden">
 					<div>LAYOUT EDITOR</div>
 					<img src='image/blank.png'>
-					Tiles are 1-7
 					<!-- button onClick="javascript: return editor ? editor.showLevelCode() : null;">
 						VIEW
 					</button -->
-					<button onClick="javascript: level.save();">
+					<button class='btn btn-success' onClick="javascript: level.save();">
 						SAVE
 					</button>
 					<span id='saveStatus'></span>

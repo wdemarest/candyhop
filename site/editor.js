@@ -56,7 +56,7 @@ var Editor = function() {
 	$(canvas).on("click", function(e) {
 		if( !active || screen != 'game' ) { return; }
 
-		var cell = getCursorPosition(canvas,e,70,70,70*10,70*10);
+		var cell = getCursorPosition(canvas,e,62,62,62*10,62*10);
 		board.set(cell.x,cell.y,(curTile || tile.empty).index);
 		layout[cell.y][cell.x] = (curTile || tile.empty).index;
 		$('.editor-layout').hide();
