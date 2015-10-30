@@ -67,7 +67,9 @@
 	#tutorial {
 		position: absolute;
 		z-index: 2;
-		font-size: 30px;
+		display: block;
+		text-align: left;
+		font-size: 22px;
 	}
 	#game .levelNumber{
 	    font-size: 40px;
@@ -110,6 +112,10 @@
 	.candyButton img.levelListStar {
 	    height: 20px;
 	    width: 20px;
+	}
+	.candyButton .starBox {
+		width: 61px;
+		white-space: nowrap;
 	}
 	.candyButton img.levelListLock {
 	    height: 30px;
@@ -168,8 +174,6 @@
 	var gameLayoutList;
 	var editorLayoutList;
 	var seenEditorTutorial = false;
-	
-
 
 	var tile = {
 	    empty: { index: 0, name: "empty", letter: ' '},
@@ -200,7 +204,9 @@
 		}
 		return null;
 	}
-	
+	var isMobileOrTablet = function() {
+	 	return typeof window.orientation !== 'undefined';
+	}	
 	function toLayout(s) {
 	    var layout = [];
 	    for( var y=0 ; y<10 ; ++y ) {
@@ -373,17 +379,22 @@
 			}
 			
 			var tut = '';
-			if(x == 0 && y == 0){
-				tut = "Use the arrow keys to move.<br />"+
-				"<img src='image/arrowKeys.png'><br />"+
-				"Hit the down arrow.";
+			if(isMobileOrTablet){
+				tut = "Tap a candy next to you to hop onto it.";
 			}
-			if((x == 0 && y == 1) || (x == 1 && y == 1)){
-				tut = "Hit the right arrow."
-			}
-			
-			if(x == 2 && y == 1){
-				tut = "Hit the up arrow.";
+			else{
+				if(x == 0 && y == 0){
+					tut = "Use the arrow keys to move.<br />"+
+					"<img src='image/arrowKeys.png'><br />"+
+					"Hit the down arrow.";
+				}
+				if((x == 0 && y == 1) || (x == 1 && y == 1)){
+					tut = "Hit the right arrow."
+				}
+				
+				if(x == 2 && y == 1){
+					tut = "Hit the up arrow.";
+				}
 			}
 			if(x == 2 && y == 0){
 				tut = "Get to the end flag with as many points as you can!";
@@ -437,10 +448,10 @@
         				html += '<button class="candyButton" onClick="javascript: $(\'#levelSelect\').hide(); level.start('+i+');">';
         			else
         				html += '<button class="candyButton">';
-    				html += "<div class='levelListNum'>"
-    				html += (i + 1)
-    				html += '</div>'
-    				html += '<div>'
+    				html += "<div class='levelListNum'>";
+    				html += (i + 1);
+    				html += '</div>';
+    				html += '<div class="starBox">';
     				if(progress !== undefined && progress !== null){
         				for(j = 0 ; j < 3 ; j ++) {
             				if((j + 1) > progress.stars){

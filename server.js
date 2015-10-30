@@ -78,7 +78,6 @@ if( !fs.existsSync(config.userDataFile) ) {
 			paid: 1,
 			isAdmin: 1,
 			isUnlocked: 1,
-			mayEdit: 1,
 			maySolve: 1,
 			progress: []
 		}
@@ -346,6 +345,9 @@ var levelPack = new (function() {
 		var newLayout = {
 			name: layout.name,
 			author: layout.author || '',
+			version: layout.version || 0,
+			published: layout.published || 0,
+			finished: layout.finished || 0,		// which version got finished?
 			map: layout.map || []
 		};
 
@@ -390,6 +392,20 @@ ops.get_stats = function(req,res) {
 	return res.end( s );
 }
 
+ops.get_emails = function(req,res) {
+	var credentials = JSON.parse( fs.readFileSync(config.credentialsFile,'utf8') || "{}" );
+	var s = '';
+	for( var userName in credentials ) {
+		var userData = userDataRead(userName);
+		if( !userData.unsubscribed ) {
+			s += userData.userEmail + ', '
+		}
+	}
+	var s = '<pre>'+s+'</pre>';
+	res.send( s );
+}
+
+
 ops.get_user = function(req,res) {
 	var userName = req.params.u || req.params.userName || req.params.user || true;
 	var userData = userDataRead(userName);
@@ -405,7 +421,6 @@ function loginActivate(req,res,userName) {
 	req.session.isAdmin = userData.isAdmin || 0;
 	req.session.paid = userData.paid || userData.isAdmin || 0;
 	req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
-	req.session.mayEdit = userData.mayEdit || userData.isAdmin || 0;
 	req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
 }
 
@@ -559,6 +574,11 @@ function serverStart() {
 		'/payment_cancel':1,
 		'/payment_code':1
 	};
+	var adminOnly = {
+		'/user': 1,
+		'/emails': 1,
+		'/stats': 1
+	};
 	console.log("\n\n"+(new Date()).toISOString()+" Serving "+config.sitePath+" on "+config.port);
 	if( config.livePayments ) {
 		console.log( "ACCEPTING LIVE PAYMENTS");
@@ -596,6 +616,10 @@ function serverStart() {
 			if( debug ) console.log(p,'always allowed');
 			return next();
 		}
+		if( adminOnly[p] && !req.session.isAdmin ) {
+			res.send( "Login as admin to access this page." );
+			return next();
+		}
 		if( req.session.userName && req.session.paid ) {
 			if( debug ) console.log(req.session.userName,'authorized and paid');
 			return next();
@@ -613,7 +637,6 @@ function serverStart() {
 		res.cookie('userName', req.session ? req.session.userName : null);
 		res.cookie('isAdmin', req.session ? req.session.isAdmin : null);
 		res.cookie('isUnlocked', req.session ? req.session.isUnlocked : null);
-		res.cookie('mayEdit', req.session ? req.session.mayEdit : null);
 		res.cookie('maySolve', req.session ? req.session.maySolve : null);
 		res.cookie('userEmail', req.session ? req.session.userEmail : null);
 		return next();
@@ -633,6 +656,7 @@ function serverStart() {
 	app.get( "/pack", levelPack.get );
 	app.post( "/pack", levelPack.post );
 	app.get( "/stats", ops.get_stats );
+	app.post( "/emails", ops.get_emails );
 	app.get( "/user", ops.get_user );
 
 	app.get( "/after_payment", function(req,res,next) {
@@ -647,13 +671,6 @@ function serverStart() {
 			req.session.destroy();
 		}
 		return siteServer(req,res);
-	});
-
-	app.get( "/editor.js", function(req,res) {
-		if( req.session && req.session.mayEdit ) {
-			return siteServer(req,res);
-		}
-		res.send('');
 	});
 
 	app.get( "/solver.js", function(req,res) {

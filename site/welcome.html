@@ -161,7 +161,7 @@ function forgot(userName) {
 						<div class="col-xs-8 inputGroupContainer">
 						<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input name="userName" placeholder="User Name" class="form-control" type="text" required>
+						<input name="userName" autocapitalize="off" placeholder="User Name" class="form-control" type="text" required>
 							</div>
 						</div>
 					</div>
@@ -181,7 +181,7 @@ function forgot(userName) {
 						<div class="col-xs-8 inputGroupContainer">
 						<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input name="password" placeholder="Password" class="form-control" type="password" required>
+						<input name="password" autocapitalize="off" placeholder="Password" class="form-control" type="password" required>
 							</div>
 						</div>
 						<span class="small text-muted"><i>Must be at least 8 characters.</i></span>
@@ -192,7 +192,7 @@ function forgot(userName) {
 						<div class="col-xs-8 inputGroupContainer">
 						<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input name="confirmation" placeholder="Password Confirmation" class="form-control" type="password" required>
+						<input name="confirmation" autocapitalize="off" placeholder="Password Confirmation" class="form-control" type="password" required>
 							</div>
 						</div>
 					</div>
@@ -264,7 +264,7 @@ function forgot(userName) {
 						<div class="col-xs-8 inputGroupContainer">
 						<div class="input-group">
 							<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-							<input id='loginUserName' name="userName" placeholder="Your user name" class="form-control" type="text" required>
+							<input id='loginUserName' autocapitalize="off" name="userName" placeholder="Your user name" class="form-control" type="text" required>
 							</div>
 						</div>
 					</div>
@@ -274,7 +274,7 @@ function forgot(userName) {
 						<div class="col-xs-8 inputGroupContainer">
 							<div class="input-group">
 								<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-								<input name="password" placeholder="Your Password" class="form-control" type="password" required style="display:inline;">
+								<input name="password" autocapitalize="off" placeholder="Your Password" class="form-control" type="password" required style="display:inline;">
 							</div>
 							<a href="javascript: forgot($('#loginUserName').val());" style="display:inline;">Forgot password?</a>
 						</div>
