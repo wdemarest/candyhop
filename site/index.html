@@ -11,13 +11,18 @@
 		background-image: url("image/waterBackground.jpg");
 	}
 	.candyButton {
-		width: 81px;
-		height: 81px;
+		width: 82px;
+		height: 82px;
 		background-image: url("image/redCandy.png");
-		background-size: 76px;
+		background-size: 80px;
 		background-repeat: no-repeat;
 		font-size: 20px;
 		top: 0px;
+		display: inline-block;
+    	text-align: center;
+    	line-height: 50px;
+    	background-color: transparent;
+    	border: 0px;
 	}
 	.candyButton img {
 		display: inline-block;
@@ -26,6 +31,9 @@
 	}
 	#levelSelect .candyButton {
 		font-size: 50px;
+		margin: auto;
+    	text-align: center;
+    	line-height: 50px;
 	}
 	.layer {
 		position: absolute;
@@ -40,6 +48,9 @@
 	#internetDown .dialogBox {
 		background-color: #f0d0d0;
 		padding: 20px;
+	}
+	#levelSelect .dialogBox {
+		width: 900px;
 	}
 	.startHidden {
 		display: none;
@@ -92,6 +103,8 @@
 		margin-top: 50px;
 		text-align: center;
 		background-color:white;
+		padding: 30px;
+		border-radius: 20px;
 	}
 	.heading {
 		font-size: 60px;
@@ -110,12 +123,14 @@
 		width: 100px;
 	}
 	.candyButton img.levelListStar {
-	    height: 20px;
-	    width: 20px;
+	    height: 24px;
+	    width: 24px;
 	}
 	.candyButton .starBox {
-		width: 61px;
+		width: 81px;
 		white-space: nowrap;
+		margin: auto;
+    	text-align: center;
 	}
 	.candyButton img.levelListLock {
 	    height: 30px;
@@ -123,6 +138,8 @@
 	}
 	.levelListNum {
 	    font-size: 40px;
+		margin: auto;
+    	text-align: center;
 	}
 	.editor {
 		border-top: 4px solid black;
@@ -445,9 +462,9 @@
     				
     				var playerMayEnterLevel = (progress !== undefined && progress !== null) || isUnlocked;
     				if( playerMayEnterLevel )
-        				html += '<button class="candyButton" onClick="javascript: $(\'#levelSelect\').hide(); level.start('+i+');">';
+        				html += '<div class="candyButton" onClick="javascript: $(\'#levelSelect\').hide(); level.start('+i+');">';
         			else
-        				html += '<button class="candyButton">';
+        				html += '<div class="candyButton">';
     				html += "<div class='levelListNum'>";
     				html += (i + 1);
     				html += '</div>';
@@ -467,11 +484,11 @@
         				    html += "<img class='levelListStar' src='image/lockedLevel.png'>";
     				    }
     				    else {
-    				        html += "<span style='font-size:9px; font-weight:bold;'>ALLOWED</span>";
+    				        html += "<img class='levelListStar' src='image/blank.png' style='width:1px;'><div style='font-size:9px; display: inline-block; font-weight:bold;'>ALLOWED</div>";
     				    }
     				}
     				html += '</div>'
-    				html += '</button>'
+    				html += '</div>'
     
     			}
     			$(".levelList").html(html);
@@ -862,6 +879,7 @@
 		imageBank.load("lock","image/lockedLevel.png");
 		imageBank.load("play","image/iconPlay.png");
 		imageBank.load("levelSelect","image/iconLevelSelect.png");
+		imageBank.load("titleScreen","image/returnIcon.png");
 		soundBank = new SoundBank();
 		soundBank.load("specialCollected","sound/star1.mp3");
 		soundBank.load("pointCollected","sound/pop.mp3");
@@ -962,7 +980,7 @@
 				</button>
 			</div>
 			<div>
-				<button onClick="javascript: logout();">
+				<button class="btn btn-info" onClick="javascript: logout();">
 					Logout
 				</button>
 			</div>
@@ -978,8 +996,8 @@
 			<div class="levelList">
 			</div>
 			<div class="toTitle">
-				<button onClick="javascript: $('#levelSelect').hide(); $('#titleScreen').show();">
-					Title Screen
+				<button class="candyButton" onClick="javascript: $('#levelSelect').hide(); $('#titleScreen').show();">
+					<img src="image/returnIcon.png">
 				</button>
 			</div>
 		</div>
@@ -1082,8 +1100,8 @@
 					</button>
 				</div>
 				<div class="toTitle">
-					<button onClick="javascript: $('#game').hide(); $('#titleScreen').show();">
-						Title Screen
+					<button class="candyButton" onClick="javascript: $('#game').hide(); $('#titleScreen').show();">
+						<img src="image/returnIcon.png">
 					</button>
 				</div>
 				<div id="levelSkip">
