@@ -50,7 +50,7 @@
 		padding: 20px;
 	}
 	#levelSelect .dialogBox {
-		width: 900px;
+		width: 920px;
 	}
 	.startHidden {
 		display: none;
@@ -81,6 +81,8 @@
 		display: block;
 		text-align: left;
 		font-size: 22px;
+		background-color: white;
+		border-radius: 12px;
 	}
 	#game .levelNumber{
 	    font-size: 40px;
@@ -375,11 +377,11 @@
 			
 			$("#tutorial").html(
 				"Step 1: Hit E to open or close the editor.<br />"+
-				"Step 2: hit the 1-7 keys to select candies.<br />"+
+				"Step 2: Hit the 0-7 keys to select candies.<br />"+
 				"Step 3: Click anywhere to place the selected candy<br />"+
 				"Step 4: Hit E to play it<br />"+
-				"Step 5: Click veiw and email us the layout<br />"+
-				"If you email us the layout we might put it in the real game!"
+				"Step 5: Click save to keep your level<br />"+
+				"COMING SOON: share levels with friends!"
 			);
 			seenEditorTutorial = true;
 		}
@@ -396,7 +398,7 @@
 			}
 			
 			var tut = '';
-			if(isMobileOrTablet){
+			if(isMobileOrTablet()){
 				tut = "Tap a candy next to you to hop onto it.";
 			}
 			else{
@@ -460,7 +462,7 @@
     				}
     				var isUnlocked = readCookie('isUnlocked') == 1 || readCookie('isAdmin') == 1;
     				
-    				var playerMayEnterLevel = (progress !== undefined && progress !== null) || isUnlocked;
+    				var playerMayEnterLevel = (progress !== undefined && progress !== null) || isUnlocked || inEditor;
     				if( playerMayEnterLevel )
         				html += '<div class="candyButton" onClick="javascript: $(\'#levelSelect\').hide(); level.start('+i+');">';
         			else
@@ -469,7 +471,8 @@
     				html += (i + 1);
     				html += '</div>';
     				html += '<div class="starBox">';
-    				if(progress !== undefined && progress !== null){
+    				if((progress !== undefined && progress !== null) || inEditor){
+    					progress = progress || { stars: 0 };
         				for(j = 0 ; j < 3 ; j ++) {
             				if((j + 1) > progress.stars){
             				    html += "<img class='levelListStar' src='image/starDarkened.png'>";
@@ -483,7 +486,7 @@
     				    if( !isUnlocked ) {
         				    html += "<img class='levelListStar' src='image/lockedLevel.png'>";
     				    }
-    				    else {
+    				    else if(!inEditor) {
     				        html += "<img class='levelListStar' src='image/blank.png' style='width:1px;'><div style='font-size:9px; display: inline-block; font-weight:bold;'>ALLOWED</div>";
     				    }
     				}
