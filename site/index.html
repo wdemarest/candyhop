@@ -23,11 +23,15 @@
     	line-height: 50px;
     	background-color: transparent;
     	border: 0px;
+    	cursor: pointer;
 	}
 	.candyButton img {
 		display: inline-block;
 		width: 50px;
 		height: 50px;
+	}
+	#titleScreenEditor {
+		font-weight: bold;
 	}
 	#levelSelect .candyButton {
 		font-size: 50px;
@@ -74,6 +78,7 @@
 	}
 	#game canvas {
 		display: block;
+    	cursor: pointer;
 	}
 	#tutorial {
 		position: absolute;
@@ -1078,11 +1083,11 @@
 				<div class="editor centered startHidden">
 					<div>LAYOUT EDITOR</div>
 					<img src='image/blank.png'>
-					<!-- button onClick="javascript: return editor ? editor.showLevelCode() : null;">
-						VIEW
-					</button -->
 					<button class='btn btn-success' onClick="javascript: level.save();">
 						SAVE
+					</button>
+					<button onClick="javascript: return editor ? editor.showLevelCode() : null;">
+						VIEW
 					</button>
 					<span id='saveStatus'></span>
 					<pre class='editor-layout startHidden'></pre>

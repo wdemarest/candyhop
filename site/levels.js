@@ -15,9 +15,63 @@ var createBlank = function(){
     ]};
 };
 
+/*
+    list.push({
+		name: "Syrupy",
+		author: "Isabel",
+		map: toLayout([
+			"S..       ",
+			"  .       ",
+			"  .       ",
+			"...       ",
+			".+  .b... ",
+			"+.  .  Eb ",
+			"+....  .. ",
+			"          ",
+			"          ",
+			"          "
+		])
+    });
+
+    list.push({
+		name: "Vivian's Level",
+		author: "Vivian",
+		map: toLayout([
+			"S.. ...E  ",
+			"  . . ..  ",
+			"  .+. ++  ",
+			"  ..      ",
+			" .gg.     ",
+			" ...+     ",
+			" ..+.     ",
+			"          ",
+			"          ",
+			"          "
+		])
+    });
+
+    list.push({
+		name: "Eric's Level",
+		author: "Eric",
+		map: toLayout([
+			"          ",
+			" ...      ",
+			"   b      ",
+			" b        ",
+			"S.   .b .E",
+			"          ",
+			"     b    ",
+			"   ...    ",
+			"          ",
+			"          "
+		])
+    });
+*/
+
+
 var createLevels = function(){
     var list = [];
-        
+    
     list.push({
        	name: "Tutorial",
         map: [
@@ -32,6 +86,7 @@ var createLevels = function(){
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0]
     ]});
+
     list.push({
        	name: "The Two Valleys",
         map: [

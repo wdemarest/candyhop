@@ -24,15 +24,15 @@ var Editor = function() {
 	}
 	this.showLevelCode = function() {
 		if( !$('.editor-layout').is(':visible') ) {
-			var s = 'toLayout([\n';
+			var s = '';
 			for( var y=0 ; y<layout.length ; y++ ) {
-				s += '\t"';
+				s += '"';
 				for( var x=0 ; x<layout[y].length ; x++ ) {
 					s += tileByIndex[layout[y][x]].letter;
 				}
 				s += '"'+(y<layout.length-1 ? ',' : '')+'\n';
 			}
-			s += '])\n';
+			s += '';
 			$('.editor-layout').text(s).show();
 		}
 		else {
