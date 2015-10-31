@@ -799,6 +799,9 @@
 	}
 
 	var gameStart = function(forceLevel){
+		if( readCookie('isDemo') == "1" ) {
+			forceLevel = 0;
+		}
 		progressGet(function(progress){
 			var i = 0;
 			while(progress[i] && progress[i].stars > 0 && i < currentLayoutList.length){

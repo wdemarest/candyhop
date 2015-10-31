@@ -77,6 +77,7 @@ if( !fs.existsSync(config.userDataFile) ) {
 			userEmail: "",
 			paid: 1,
 			isAdmin: 1,
+			isDemo: 0,
 			isUnlocked: 1,
 			maySolve: 1,
 			progress: []
@@ -419,6 +420,7 @@ function loginActivate(req,res,userName) {
 	req.session.userEmail = userData.userEmail || '';
 	req.session.userName = userData.userName || '';
 	req.session.isAdmin = userData.isAdmin || 0;
+	req.session.isDemo = userData.isDemo || 0;
 	req.session.paid = userData.paid || userData.isAdmin || 0;
 	req.session.isUnlocked = userData.isUnlocked || userData.isAdmin || 0;
 	req.session.maySolve = userData.maySolve || userData.isAdmin|| 0;
@@ -636,6 +638,7 @@ function serverStart() {
 		//console.log('setupLocals');
 		res.cookie('userName', req.session ? req.session.userName : null);
 		res.cookie('isAdmin', req.session ? req.session.isAdmin : null);
+		res.cookie('isDemo', req.session ? req.session.isDemo : null);
 		res.cookie('isUnlocked', req.session ? req.session.isUnlocked : null);
 		res.cookie('maySolve', req.session ? req.session.maySolve : null);
 		res.cookie('userEmail', req.session ? req.session.userEmail : null);
