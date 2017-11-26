@@ -2,13 +2,13 @@
 
 # TO SETUP A NEW SERVER
 
--1. If you need to generate a keypair (typically you'll let AWS do this for you)
+1. If you need to generate a keypair (typically you'll let AWS do this for you)
     openssl genrsa -des3 -out jeesty.pem 2048
     openssl rsa -in jeesty.pem -outform PEM -pubout -out jeesty.pub
     chmod 400 ~/.ssh/jeesty.pub
     chmod 400 ~/.ssh/jeesty.pem
 
-0. Boot a fresh Ubuntu instance at EC2
+2. Boot a fresh Ubuntu instance at EC2
     Visit aws.amazon.com, login and access EC2
     Click [Launch]
     Pick "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type"
@@ -18,7 +18,7 @@
     Save it as ~/.ssh/jeesty.pem
     chmod 400 ~/.ssh/jeesty.pem
 
-1. Setup the .pem file
+3. Setup the .pem file
 From local osx terminal:
 
     cd ~/.ssh
@@ -26,11 +26,11 @@ From local osx terminal:
     copy/paste the private key you used to boot the AWS machine into that file
     ctrl-x  y  <enter>
 
-2. Secure shell to the remote
+4. Secure shell to the remote
 
     ssh -i "~/.ssh/jeesty.pem" ubuntu@54.152.44.153
 
-3. Install NodeJs and Git
+5. Install NodeJs and Git
 
     sudo apt-get update
     sudo apt-get install git
@@ -38,18 +38,18 @@ From local osx terminal:
     sudo apt-get install npm
     sudo npm install -g supervisor
 
-4. Clone the repo
+6. Clone the repo
 
     cd ~
     git clone https://github.com/wdemarest/candyhop
     cd candyhop
     sudo npm install
 
-5. direct port 8080 to port 80
+7. direct port 8080 to port 80
 
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 
-6. Setup your ~/candyhop/config.json file.
+8. Setup your ~/candyhop/config.json file.
 
     {
             "port": 8080,                                                                                        
@@ -60,9 +60,9 @@ From local osx terminal:
             "userDataFile": "userdata.json"
     }
 
-7. Edit the ./ssh/known_hosts file and paste appropriate public keys
+9. Edit the ./ssh/known_hosts file and paste appropriate public keys
 
-8. Get a Mandrill account
+10. Get a Mandrill account
    - verify the email address
    - add a DKIM record
 - setup postfix on the server:
