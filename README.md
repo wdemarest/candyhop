@@ -70,6 +70,12 @@ sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 - setup postfix on the server:
    http://www.techknowjoe.com/article/create-your-own-email-forwarding-server
 
+11. Test the server is working
+```
+nodejs ./server.js
+```
+then launch your browser and visit the appropriate IP address on port 80.
+
 # Running the Server
 
 While logged in to the koding.com server, or any machine that has its public key on
