@@ -2,6 +2,22 @@
 
 # TO SETUP A NEW SERVER
 
+-1. If you need to generate a keypair (typically you'll let AWS do this for you)
+    openssl genrsa -des3 -out jeesty.pem 2048
+    openssl rsa -in jeesty.pem -outform PEM -pubout -out jeesty.pub
+    chmod 400 ~/.ssh/jeesty.pub
+    chmod 400 ~/.ssh/jeesty.pem
+
+0. Boot a fresh Ubuntu instance at EC2
+    Visit aws.amazon.com, login and access EC2
+    Click [Launch]
+    Pick "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type"
+    Pick "t2.micro - free tier eligible"
+    Accept all defaults for storage, security, etc.
+    Pick [Launch], and create a new keypair
+    Save it as ~/.ssh/jeesty.pem
+    chmod 400 ~/.ssh/jeesty.pem
+
 1. Setup the .pem file
 From local osx terminal:
 
@@ -12,12 +28,13 @@ From local osx terminal:
 
 2. Secure shell to the remote
 
-    ssh -i "CandyHop.pem" ubuntu@52.23.240.212
+    ssh -i "~/.ssh/jeesty.pem" ubuntu@54.152.44.153
 
 3. Install NodeJs and Git
 
+    sudo apt-get update
     sudo apt-get install git
-    sudo apt-get install node
+    sudo apt-get install nodejs
     sudo apt-get install npm
     sudo npm install -g supervisor
 
