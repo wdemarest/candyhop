@@ -16,27 +16,40 @@ var config = JSON.parse( fs.readFileSync("config.json",'utf8') || "" );
 /*
 Sample config
 {
-        "port": 8090,
-        "portExternal": 8090,
-        "sitePath": "site",
-        "adminPassword": "??",
-        "contactEmail": "??",
-        "mandrillApiKey": "",
-        "credentialsFile": "credentials.json",
-        "userDataFile": "userdata.json",
-        "purchaseCode": "??",
-        "livePayments": false,
-        "paypal": {
-            "host" : "",  // leave blank
-            "port" : "",  // leave blank
-            "client_id" : " a value",
-            "client_secret" : "a value"
-        }
+    "port": 8090,
+    "portExternal": 8090,
+    "sitePath": "site",
+    "adminPassword": "??",
+    "contactEmail": "??",
+    "mandrillApiKey": "",
+    "credentialsFile": "credentials.json",
+    "userDataFile": "userdata.json",
+    "purchaseCode": "??",
+	"paymentMode": "paypal_sandbox",
+    "paypal_sandbox": {
+		"host": "api.sandbox.paypal.com",
+		"client_id": "ASW4h_tv_y91GUzTO7CBUgUTZI3Xg1cZo0T-oPFubrcXPPq4VhMP4cOdtUBr1Tm0i3W0LmN$
+		"client_secret": "EGGu_YIqVTamSEq_UERcHFrcQKap_CjEaOFvEi0GDDkxb2fphF54G7fM9Z81QGw8Njx$
+    },
+    "paypal_live": {
+    	"live": true,
+		"host": "api.paypal.com",
+		"client_id" : "AWkOeefJctfneVx4unTEguP0HO_yTPP6pxBxPQtDg27t4hZCN760AV2D1-kKzGaqvqDrS_$
+		"client_secret" : "EItk59pWazWtEMXqJF0X8LnDtjN5U-7OGT1VLTsR9i9dFFHZo-F2Pe3lp-06iYXE8Q$
+	}
 }
 */
+if( !config.paymentMode ) {
+	console.log("Error: config variable 'paymentMode' missing or empty.");
+	return;
+}
 
-config.paypal.host = config.livePayments ? 'api.paypal.com' : 'api.sandbox.paypal.com';
-config.paypal.mode = config.livePayments ? 'live' : 'sandbox';
+if( !config[config.paymentMode] ) {
+	console.log("Error: config lacks an entry named '"+paymentMode+"'.");
+	return;
+}
+config.paypal = config[config.paymentMode];
+config.paypal.port = config.paypal.port || "";
 paypal.configure(config.paypal);
 
 if( !fs.existsSync('./sessions') ) {
@@ -160,7 +173,7 @@ payment.execute = function(req,res) {
 			res.redirect('/buy.html?pay=failure '+error.message);
 		} else {
 			console.log("User "+userName+" paid");
-			var paymentFile = 'payments/'+(config.livePayments?'':'TEST_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
+			var paymentFile = 'payments/'+(config.paypal.live?'':'TEST_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
 			console.log("Saving to "+paymentFile);
 			fs.writeFileSync(paymentFile, JSON.stringify(payment,null,4));
 			var userData = userDataRead(userName);
@@ -194,7 +207,7 @@ payment.useCode = function(req,res) {
 	}
 
 	console.log("User "+userName+" used a purchase code");
-	var paymentFile = 'payments/'+(config.livePayments?'':'PCODE_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
+	var paymentFile = 'payments/'+(config.paypal.live?'':'PCODE_')+userName+'_'+(new Date()).toISOString().substring(0,19).replace(/[:.]/g,'-')+'.json';
 	console.log("Saving to "+paymentFile);
 	fs.writeFileSync(paymentFile, JSON.stringify({userName:userName, date:(new Date()).toISOString()},null,4));
 	var userData = userDataRead(userName);
@@ -582,7 +595,7 @@ function serverStart() {
 		'/stats': 1
 	};
 	console.log("\n\n"+(new Date()).toISOString()+" Serving "+config.sitePath+" on "+config.port);
-	if( config.livePayments ) {
+	if( config.paypal.live ) {
 		console.log( "ACCEPTING LIVE PAYMENTS");
 		console.log(config.paypal);
 	}
