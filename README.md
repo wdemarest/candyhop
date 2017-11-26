@@ -85,11 +85,11 @@ the playcandyhop.com server, run:
 
     ./pch [ deploy | stop | start | restart | watch ]
 
-deploy - forces the playcandyhop.com machine to conform to the git master
-stop - stops the server
-start - starts the server
-restart - shuts down any running server and starts it up fresh, with auto-restarting
-watch - shows the server's log file
+* deploy - forces the playcandyhop.com machine to conform to the git master
+* stop - stops the server
+* start - starts the server
+* restart - shuts down any running server and starts it up fresh, with auto-restarting
+* watch - shows the server's log file
 
 # To sign players up
 
@@ -100,5 +100,6 @@ watch - shows the server's log file
 # Public Key
 
 For reference, here is the public key to connect using CandyHop.pem:
+```
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdzhJlKt5CPCB0oX5Jt8ctjgr2Scdw0ARKb4c6hW3rqHzGU8K7q+W4ulVIGJzrCB5o1lVvcfzEPu37rdon1VngZMHAhEtf5SyNxIbOBqXrCpge2UvMUDW8fxOez1O+pVotx4IYoC1jzwfJEWD6LFmGUuKVxTxbkUCNmPiosECGBMEHvrsOWsFL9vUXhp/WrnMPP/KGCMN6Wm0W1kxlv8ISp6tQ8Zi3u4by0C+5FSKW7Ta5Z9EzdxKRMVyPw0Kw3Y9QiLYEoSkM5B3UcXtK+eCL2AR8nE/ul/kRdG/QfDrW3Bf+QDX5MClCVXtk0qIn7q/U65kr4embszEwOBzB8BAB CandyHop
-</pre>
+```
