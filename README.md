@@ -58,19 +58,9 @@ sudo npm install
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 ```
 
-8. Setup your ~/candyhop/config.json file.
-```javascript
-    {
-            "port": 8080,                                                                                        
-            "sitePath": "site",
-            "contactEmail": "will.demarest@gmail.com",
-            "mandrillApiKey": "",
-            "credentialsFile": "credentials.json",
-            "userDataFile": "userdata.json"
-    }
-```
+8. Setup your ~/candyhop/config.json file based on config-template.json
 
-9. Edit the ./ssh/known_hosts file and paste appropriate public keys
+9. Edit the remote ./ssh/known_hosts file and paste appropriate public keys
 
 10. Get a Mandrill account
    - verify the email address
