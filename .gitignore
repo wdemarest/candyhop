@@ -28,5 +28,6 @@ node_modules
 .remote-sync.json
 sessions
 *.json
+-config-template.json
 -package.json
 

@@ -1,0 +1,20 @@
+{
+	// Use this file as a basis to create config.json
+	// Remove all comments from this file, since they are illegal JSON.
+	"port": 8090,
+	"portExternal": 8090,
+	"sitePath": "site",
+	"adminPassword": "??",		// Used when you want to login as  'admin'
+	"contactEmail": "??",		// Used by Mandrill
+	"mandrillApiKey": "",		// Used by Mandrill
+	"credentialsFile": "credentials.json",
+	"userDataFile": "userdata.json",
+	"purchaseCode": "??",		// Server uses this to say a purchase attempt is valid
+	"livePayments": false,		// When false uses api.sandbox.paypal.com
+	"paypal": {
+		"host" : "",  			// leave blank
+		"port" : "",  			// leave blank
+		"client_id" : "",		// Provided by PayPal for our account
+		"client_secret" : ""	// Provided by PayPal for our account
+	}
+}
