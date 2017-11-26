@@ -16,7 +16,8 @@ Visit aws.amazon.com, login and access EC2
 Click [Launch]
 Pick "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type"
 Pick "t2.micro - free tier eligible"
-Accept all defaults for storage, security, etc.
+Change Security to allow "outbound all" and "inbound port 22" and "inbound port 80"
+Accept all other defaults for storage, etc.
 Pick [Launch], and create a new keypair
 Save it as ~/.ssh/jeesty.pem
 chmod 400 ~/.ssh/jeesty.pem
@@ -53,24 +54,15 @@ cd candyhop
 sudo npm install
 ```
 
-7. direct port 8080 to port 80
+7. Redirect port 8080 to port 80. We don't want to run the server as root, but ports below 1024 are root only, so this is the safe workaround.
 ```bash
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+sudo sysctl net.ipv4.ip_forward=1
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 ```
 
-8. Setup your ~/candyhop/config.json file.
-```javascript
-    {
-            "port": 8080,                                                                                        
-            "sitePath": "site",
-            "contactEmail": "will.demarest@gmail.com",
-            "mandrillApiKey": "",
-            "credentialsFile": "credentials.json",
-            "userDataFile": "userdata.json"
-    }
-```
+8. Setup your ~/candyhop/config.json file based on config-template.json
 
-9. Edit the ./ssh/known_hosts file and paste appropriate public keys
+9. Edit the remote ./ssh/known_hosts file and paste appropriate public keys
 
 10. Get a Mandrill account
    - verify the email address
