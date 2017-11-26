@@ -13,32 +13,7 @@ var paypal = require('paypal-rest-sdk');
 var app = express();
 
 var config = JSON.parse( fs.readFileSync("config.json",'utf8') || "" );
-/*
-Sample config
-{
-    "port": 8090,
-    "portExternal": 8090,
-    "sitePath": "site",
-    "adminPassword": "??",
-    "contactEmail": "??",
-    "mandrillApiKey": "",
-    "credentialsFile": "credentials.json",
-    "userDataFile": "userdata.json",
-    "purchaseCode": "??",
-	"paymentMode": "paypal_sandbox",
-    "paypal_sandbox": {
-		"host": "api.sandbox.paypal.com",
-		"client_id": "ASW4h_tv_y91GUzTO7CBUgUTZI3Xg1cZo0T-oPFubrcXPPq4VhMP4cOdtUBr1Tm0i3W0LmN$
-		"client_secret": "EGGu_YIqVTamSEq_UERcHFrcQKap_CjEaOFvEi0GDDkxb2fphF54G7fM9Z81QGw8Njx$
-    },
-    "paypal_live": {
-    	"live": true,
-		"host": "api.paypal.com",
-		"client_id" : "AWkOeefJctfneVx4unTEguP0HO_yTPP6pxBxPQtDg27t4hZCN760AV2D1-kKzGaqvqDrS_$
-		"client_secret" : "EItk59pWazWtEMXqJF0X8LnDtjN5U-7OGT1VLTsR9i9dFFHZo-F2Pe3lp-06iYXE8Q$
-	}
-}
-*/
+
 if( !config.paymentMode ) {
 	console.log("Error: config variable 'paymentMode' missing or empty.");
 	return;

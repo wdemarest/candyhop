@@ -34,7 +34,7 @@ ctrl-x  y  <enter>
 
 4. Secure shell to the remote
 ```bash
-ssh -i "~/.ssh/jeesty.pem" ubuntu@54.152.44.153
+ssh -i ~/.ssh/jeesty.pem ubuntu@54.152.44.153
 ```
 
 5. Install NodeJs and Git
