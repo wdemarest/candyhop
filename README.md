@@ -3,54 +3,63 @@
 # TO SETUP A NEW SERVER
 
 1. If you need to generate a keypair (typically you'll let AWS do this for you)
-    openssl genrsa -des3 -out jeesty.pem 2048
-    openssl rsa -in jeesty.pem -outform PEM -pubout -out jeesty.pub
-    chmod 400 ~/.ssh/jeesty.pub
-    chmod 400 ~/.ssh/jeesty.pem
+```bash
+openssl genrsa -des3 -out jeesty.pem 2048
+openssl rsa -in jeesty.pem -outform PEM -pubout -out jeesty.pub
+chmod 400 ~/.ssh/jeesty.pub
+chmod 400 ~/.ssh/jeesty.pem
+```
 
 2. Boot a fresh Ubuntu instance at EC2
-    Visit aws.amazon.com, login and access EC2
-    Click [Launch]
-    Pick "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type"
-    Pick "t2.micro - free tier eligible"
-    Accept all defaults for storage, security, etc.
-    Pick [Launch], and create a new keypair
-    Save it as ~/.ssh/jeesty.pem
-    chmod 400 ~/.ssh/jeesty.pem
+```
+Visit aws.amazon.com, login and access EC2
+Click [Launch]
+Pick "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type"
+Pick "t2.micro - free tier eligible"
+Accept all defaults for storage, security, etc.
+Pick [Launch], and create a new keypair
+Save it as ~/.ssh/jeesty.pem
+chmod 400 ~/.ssh/jeesty.pem
+```
 
 3. Setup the .pem file
 From local osx terminal:
-
-    cd ~/.ssh
-    pico CandyHop.pem
-    copy/paste the private key you used to boot the AWS machine into that file
-    ctrl-x  y  <enter>
+```bash
+cd ~/.ssh
+pico CandyHop.pem
+copy/paste the private key you used to boot the AWS machine into that file
+ctrl-x  y  <enter>
+```
 
 4. Secure shell to the remote
-
-    ssh -i "~/.ssh/jeesty.pem" ubuntu@54.152.44.153
+```bash
+ssh -i "~/.ssh/jeesty.pem" ubuntu@54.152.44.153
+```
 
 5. Install NodeJs and Git
-
-    sudo apt-get update
-    sudo apt-get install git
-    sudo apt-get install nodejs
-    sudo apt-get install npm
-    sudo npm install -g supervisor
+```bash
+sudo apt-get update
+sudo apt-get install git
+sudo apt-get install nodejs
+sudo apt-get install npm
+sudo npm install -g supervisor
+```
 
 6. Clone the repo
-
-    cd ~
-    git clone https://github.com/wdemarest/candyhop
-    cd candyhop
-    sudo npm install
+```bash
+cd ~
+git clone https://github.com/wdemarest/candyhop
+cd candyhop
+sudo npm install
+```
 
 7. direct port 8080 to port 80
-
-    iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+```bash
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
 
 8. Setup your ~/candyhop/config.json file.
-
+```javascript
     {
             "port": 8080,                                                                                        
             "sitePath": "site",
@@ -59,6 +68,7 @@ From local osx terminal:
             "credentialsFile": "credentials.json",
             "userDataFile": "userdata.json"
     }
+```
 
 9. Edit the ./ssh/known_hosts file and paste appropriate public keys
 
@@ -91,3 +101,4 @@ watch - shows the server's log file
 
 For reference, here is the public key to connect using CandyHop.pem:
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdzhJlKt5CPCB0oX5Jt8ctjgr2Scdw0ARKb4c6hW3rqHzGU8K7q+W4ulVIGJzrCB5o1lVvcfzEPu37rdon1VngZMHAhEtf5SyNxIbOBqXrCpge2UvMUDW8fxOez1O+pVotx4IYoC1jzwfJEWD6LFmGUuKVxTxbkUCNmPiosECGBMEHvrsOWsFL9vUXhp/WrnMPP/KGCMN6Wm0W1kxlv8ISp6tQ8Zi3u4by0C+5FSKW7Ta5Z9EzdxKRMVyPw0Kw3Y9QiLYEoSkM5B3UcXtK+eCL2AR8nE/ul/kRdG/QfDrW3Bf+QDX5MClCVXtk0qIn7q/U65kr4embszEwOBzB8BAB CandyHop
+</pre>
