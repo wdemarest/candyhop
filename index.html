@@ -626,7 +626,7 @@
 			$('#saveStatus').text('Saving...');
 			
 			internet.ajax({
-				url: '/pack',
+				url: '/chpack',
 				method: 'POST',
 				contentType:"application/json; charset=utf-8",
 				data: JSON.stringify({
@@ -646,7 +646,7 @@
 
 	function loadPack(userName,callback) {
     	internet.ajax({
-			url: '/pack',
+			url: '/chpack',
 			method: 'GET',
 			contentType:"application/json; charset=utf-8",
 			data: { userName: userName },
