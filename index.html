@@ -839,30 +839,30 @@
 
 	}
 
-    var progressGet = function(callback) {
-    	if(inEditor){
-    		var emptyProgress = [];
-    		callback(emptyProgress);
-    		return;
-    	}
-    	internet.ajax({
-			url: '/progress',
+	var progressGet = function(callback) {
+		if(inEditor){
+			var emptyProgress = [];
+			callback(emptyProgress);
+			return;
+		}
+		internet.ajax({
+			url: '/chProgress',
 			method: 'GET',
 			contentType:"application/json; charset=utf-8",
 			data: {},
 		}, callback );
 	}
-	
+
 	var progressSave = function(levelNumber,pointsCollected,stars,callback) {
 		if(inEditor){
-    		var result = {
-    			result: "success"
-    		}
-    		callback(result);
-    		return;
-    	}
+			var result = {
+				result: "success"
+			}
+			callback(result);
+			return;
+		}
 		internet.ajax({
-			url: '/progress',
+			url: '/chProgress',
 			method: 'POST',
 			contentType:"application/json; charset=utf-8",
 			data: JSON.stringify({

@@ -508,7 +508,7 @@
 	}
     var progressGet = function(callback) {
 		$.ajax({
-			url: '/progress',
+			url: '/chProgress',
 			method: 'GET',
 			contentType:"application/json; charset=utf-8",
 			data: {},
@@ -522,7 +522,7 @@
 	}
 	var progressSave = function(levelNumber,pointsCollected,stars,callback) {
 		$.ajax({
-			url: '/progress',
+			url: '/chProgress',
 			method: 'POST',
 			contentType:"application/json; charset=utf-8",
 			data: JSON.stringify({
